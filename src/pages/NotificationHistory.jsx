@@ -1,0 +1,270 @@
+import React, { useState } from "react";
+import axiosClient from "../utils/axiosClient";
+import { useQuery } from "@tanstack/react-query";
+import { useNavigate } from "react-router";
+
+export default function NotificationHistory() {
+  const navigate = useNavigate();
+
+  const [page, setPage] = useState(1);
+  const [search, setSearch] = useState("");
+
+  /* ======================================================
+     📡 FETCH NOTIFICATIONS
+  ====================================================== */
+  const { data, isLoading } = useQuery({
+    queryKey: ["notifications-history", page],
+    queryFn: async () => {
+      const res = await axiosClient.get("/api/v1/notifications");
+      return res.data;
+    },
+    keepPreviousData: true,
+  });
+
+  const notifications = data?.data || [];
+  const stats = data?.stats || {};
+  const pagination = data?.pagination || {};
+
+  /* ======================================================
+     🔍 SEARCH FILTER (FRONTEND)
+  ====================================================== */
+  const filtered = notifications.filter((item) =>
+    item.title?.toLowerCase().includes(search.toLowerCase()),
+  );
+
+  return (
+    <div className="bg-[#e2fffe] text-[#002020] min-h-screen">
+      <main className="p-8 space-y-8 max-w-[1600px] mx-auto">
+        {/* <!-- Header Section: Editorial Engine --> */}
+        <section className="flex justify-between items-end">
+          <div className="space-y-1">
+            <span className="text-[#006d36] font-bold tracking-widest text-[10px] uppercase">
+              Fleet Communication Ledger
+            </span>
+            <h1 className="text-display-sm md:text-4xl font-extrabold text-[#001736] tracking-tight">
+              Notification History
+            </h1>
+          </div>
+          <div className="flex gap-3">
+            <div className="flex items-center bg-[#d7fafa] px-4 py-2 rounded-xl border border-[#c4c6d0]/10 shadow-sm">
+              <span className="material-symbols-outlined text-[#001736] text-sm mr-2">
+                search
+              </span>
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="bg-transparent border-none focus:ring-0 text-sm font-medium text-[#001736] placeholder:text-slate-400 w-64"
+                placeholder="Search ..."
+                type="text"
+              />
+            </div>
+            <button className="bg-[#001736] text-[#ffffff] px-6 py-2 rounded-xl flex items-center gap-2 hover:bg-[#002b5b] transition-all ease-out scale-98 active:scale-95 font-semibold text-sm">
+              <span className="material-symbols-outlined text-sm">
+                filter_list
+              </span>
+              Refine View
+            </button>
+          </div>
+        </section>
+        {/* <!-- Metrics Overview: Bento Style --> */}
+        <section className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <Stat title="Total" value={stats.total} />
+          <Stat title="Delivered" value={stats.delivered} />
+          <Stat title="Pending" value={stats.pending} />
+          <Stat title="Failed" value={stats.failed} />
+        </section>
+        {/* <!-- Main Data Table: Kinetic Precision --> */}
+        <div class="bg-[#ffffff] rounded-2xl shadow-sm overflow-hidden border border-[#c4c6d0]/10">
+          <div class="overflow-x-auto custom-scrollbar">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="bg-surface-container-low">
+                  <th class="px-6 py-5 text-label-sm font-bold text-[#001736] uppercase tracking-widest border-b border-[#c4c6d0]/20">
+                    Notification Title
+                  </th>
+                  <th class="px-6 py-5 text-label-sm font-bold text-[#001736] uppercase tracking-widest border-b border-[#c4c6d0]/20">
+                    Channel
+                  </th>
+                  <th class="px-6 py-5 text-label-sm font-bold text-[#001736] uppercase tracking-widest border-b border-[#c4c6d0]/20">
+                    Audience Target
+                  </th>
+                  <th class="px-6 py-5 text-label-sm font-bold text-[#001736] uppercase tracking-widest border-b border-[#c4c6d0]/20 text-center">
+                    Sent Count
+                  </th>
+                  <th class="px-6 py-5 text-label-sm font-bold text-[#001736] uppercase tracking-widest border-b border-[#c4c6d0]/20">
+                    Timestamp
+                  </th>
+                  <th class="px-6 py-5 text-label-sm font-bold text-[#001736] uppercase tracking-widest border-b border-[#c4c6d0]/20">
+                    Created By
+                  </th>
+                  <th class="px-6 py-5 text-label-sm font-bold text-[#001736] uppercase tracking-widest border-b border-[#c4c6d0]/20">
+                    Status
+                  </th>
+                  <th class="px-6 py-5 text-label-sm font-bold text-[#001736] uppercase tracking-widest border-b border-[#c4c6d0]/20"></th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-[#c4c6d0]/10">
+                {filtered.map((notification) => (
+                  <tr
+                    key={notification._id}
+                    onClick={() => navigate(`/admin/messages/${item._id}`)}
+                    class="hover:bg-[#d2f5f4]/30 transition-colors"
+                  >
+                    <td class="px-6 py-4">
+                      <div class="flex flex-col">
+                        <span class="text-sm font-bold text-[#001736]">
+                          {item.title}
+                        </span>
+                      </div>
+                    </td>
+                    <td class="px-6 py-4">
+                      <div class="flex gap-2">
+                        <span class="px-2 py-1 bg-[#001736] text-white text-[10px] font-bold rounded uppercase">
+                          {item.channel || item.type}
+                        </span>
+                      </div>
+                    </td>
+                    <td class="px-6 py-4">
+                      <span class="text-sm font-medium text-[#002020]">
+                        {item.targetAudience || item.email}
+                      </span>
+                    </td>
+                    <td class="px-6 py-4 text-center">
+                      <span class="text-sm font-extrabold text-[#001736]">
+                        1,402
+                      </span>
+                    </td>
+                    <td class="px-6 py-4">
+                      <div class="flex flex-col">
+                        <span class="text-sm font-bold text-[#001736]">
+                          {item.sentCount || 1}
+                        </span>
+                      </div>
+                    </td>
+                    <td class="px-6 py-4">
+                      <div class="flex items-center gap-2">
+                        <span class="text-sm font-medium text-[#001736]">
+                          {new Date(item.createdAt).toLocaleString()}
+                        </span>
+                      </div>
+                    </td>
+                    <td class="px-6 py-4">
+                      <div class="flex items-center gap-2 text-[#006d36]">
+                        <span class="w-2 h-2 rounded-full bg-[#006d36]"></span>
+                        <span class="text-xs font-bold uppercase tracking-wider">
+                          <StatusBadge status={item.status} />
+                        </span>
+                      </div>
+                    </td>
+                    <td class="px-6 py-4 text-right">
+                      <button class="text-[#001736] hover:text-[#00743a] transition-colors">
+                        <span class="material-symbols-outlined">more_vert</span>
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          {/* <!-- Pagination / Footer Logic --> */}
+          <div class="bg-[#d7fafa] px-8 py-4 flex justify-between items-center border-t border-[#c4c6d0]/10">
+            <button disabled={page === 1} onClick={() => setPage((p) => p - 1)}>
+              Prev
+            </button>
+
+            <span>
+              Page {pagination.currentPage} / {pagination.totalPages}
+            </span>
+
+            <button
+              disabled={page === pagination.totalPages}
+              onClick={() => setPage((p) => p + 1)}
+            >
+              Next
+            </button>
+          </div>
+        </div>
+        {/* <!-- System Analytics: Kinetic Map Overlay Style --> */}
+        <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div class="lg:col-span-2 bg-[#c6e9e9]/30 rounded-2xl p-6 relative overflow-hidden h-64 border border-[#c4c6d0]/20">
+            <div class="relative z-10 space-y-2">
+              <h3 class="text-lg font-bold text-[#001736]">
+                Transmission Heatmap
+              </h3>
+              <p class="text-xs text-slate-500 max-w-xs">
+                Real-time visualization of geographic notification density
+                across the primary transit corridors.
+              </p>
+            </div>
+            <div class="absolute inset-0 z-0 opacity-40 grayscale hover:grayscale-0 transition-all duration-700">
+              <img
+                alt="Logistics map"
+                class="w-full h-full object-cover"
+                data-alt="highly detailed digital topographic map of North America with blue and green data visualization overlays showing logistics corridors"
+                data-location="North America"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBe1Be3iGhCOmyB_ny-k8QNGrSnc8tTHh3GgpVFUMcPFZhymRmwJtQi3xD9pYFdTeJY4ycls2YlVIGglUL8QKAuoX3kFwofCp5gq5MoqJUGqJw4jFhFY16tSGGzEh8kJ3m1FI1JewE6rNk2Q8XS4kY4ZXm6ukjITB-HDXdkSb5MCfP0MF7XW4dAJTb1aXs8Bp4vLqgTt31sDGXmGlcKHJRRg4KA2f0jT0ZRchd9rdTOUttTPZOOEG8ao-X1gwtcasfThZnAhA7u710B"
+              />
+            </div>
+            <div class="absolute bottom-6 right-6 z-20">
+              <div class="bg-[#e2fffe]/80 backdrop-blur-lg p-4 rounded-xl shadow-xl border border-white/20">
+                <div class="flex items-center gap-3">
+                  <div class="w-3 h-3 rounded-full bg-[#006d36]"></div>
+                  <span class="text-xs font-bold text-[#001736] tracking-tight">
+                    Active Transmissions (1.2k)
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="bg-[#001736] text-[#ffffff] rounded-2xl p-6 flex flex-col justify-between overflow-hidden relative">
+            <div class="space-y-4">
+              <h3 class="text-lg font-bold tracking-tight">Audit Log Export</h3>
+              <p class="text-xs text-[#ffffff]/70 leading-relaxed">
+                Generate a cryptographically signed CSV or PDF manifest of all
+                notifications for regulatory compliance.
+              </p>
+            </div>
+            <div class="mt-8">
+              <button class="w-full bg-[#006d36] text-white py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 hover:bg-[#005227] transition-all">
+                <span class="material-symbols-outlined text-sm">download</span>
+                Export Full Ledger
+              </button>
+            </div>
+            {/* <!-- Abstract Texture --> */}
+            <div class="absolute -right-12 -bottom-12 w-48 h-48 bg-[#002b5b] rounded-full blur-3xl opacity-50"></div>
+          </div>
+        </section>
+      </main>
+      {/* <!-- Contextual Information Overlay --> */}
+      <footer class="mt-12 p-8 border-t border-[#c4c6d0]/10 text-center">
+        <div class="flex justify-center items-center gap-4 text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">
+          <span>Secured Terminal</span>
+          <span class="w-1 h-1 bg-slate-400 rounded-full"></span>
+          <span>Version 4.9.2-Precision</span>
+          <span class="w-1 h-1 bg-slate-400 rounded-full"></span>
+          <span>Kinetic Precision Design System</span>
+        </div>
+      </footer>
+    </div>
+  );
+}
+function Stat({ title, value }) {
+  return (
+    <div className="bg-white p-6 rounded-xl shadow">
+      <p className="text-xs uppercase text-gray-500">{title}</p>
+      <h2 className="text-2xl font-bold">{value || 0}</h2>
+    </div>
+  );
+}
+
+function StatusBadge({ status }) {
+  const colors = {
+    delivered: "text-green-600",
+    pending: "text-yellow-600",
+    failed: "text-red-600",
+  };
+
+  return (
+    <span className={`font-bold ${colors[status]}`}>{status || "unknown"}</span>
+  );
+}

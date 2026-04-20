@@ -1,0 +1,21 @@
+@import "tailwindcss";
+
+/* Optional global styles */
+body {
+  background-color: #f8f9fa;
+  color: #111;
+  font-family: "Inter", sans-serif;
+}
+
+.hero-clip {
+  clip-path: polygon(0 0, 100% 0, 100% 85%, 0% 100%);
+}
+
+.kinetic-gradient {
+  background: linear-gradient(135deg, #001736 0%, #002b5b 100%);
+}
+
+.glass-nav {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(20px);
+}
