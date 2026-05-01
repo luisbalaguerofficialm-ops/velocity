@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import axiosClient from "../utils/axiosClient";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 
 export default function AllShipmentFeed() {
   const navigate = useNavigate();
@@ -17,7 +17,7 @@ export default function AllShipmentFeed() {
   const { data, isLoading, isError } = useQuery({
     queryKey: ["shipments", status, serviceLevel, page],
     queryFn: async () => {
-      const params = { page, limit: 10 };
+      const params = { page, limit: 5 };
 
       if (status !== "all") params.status = status;
       if (serviceLevel !== "all") params.serviceLevel = serviceLevel;
@@ -202,25 +202,25 @@ export default function AllShipmentFeed() {
                   {/* TABLE HEADER */}
                   <thead>
                     <tr className="bg-[#001736] text-white">
-                      <th className="px-6 py-4 text-xs font-label uppercase tracking-widest text-[#43474f] font-extrabold">
+                      <th className="px-6 py-4 text-xs font-label uppercase tracking-widest font-extrabold">
                         Tracking ID
                       </th>
-                      <th className="px-6 py-4 text-xs font-label uppercase tracking-widest text-[#43474f] font-extrabold">
+                      <th className="px-6 py-4 text-xs font-label uppercase tracking-widest font-extrabold">
                         Status
                       </th>
-                      <th className="px-6 py-4 text-xs font-label uppercase tracking-widest text-[#43474f] font-extrabold">
+                      <th className="px-6 py-4 text-xs font-label uppercase tracking-widest font-extrabold">
                         Origin
                       </th>
-                      <th className="px-6 py-4 text-xs font-label uppercase tracking-widest text-[#43474f] font-extrabold">
+                      <th className="px-6 py-4 text-xs font-label uppercase tracking-widest font-extrabold">
                         Destination
                       </th>
-                      <th className="px-6 py-4 text-xs font-label uppercase tracking-widest text-[#43474f]  font-extrabold">
+                      <th className="px-6 py-4 text-xs font-label uppercase tracking-widest font-extrabold">
                         Service Level
                       </th>
-                      <th className="px-6 py-4 text-xs font-label uppercase tracking-widest text-[#43474f]  font-extrabold">
+                      <th className="px-6 py-4 text-xs font-label uppercase tracking-widest font-extrabold">
                         ETA
                       </th>
-                      <th className="px-6 py-4 text-xs font-label uppercase tracking-widest text-[#43474f] font-extrabold">
+                      <th className="px-6 py-4 text-xs font-label uppercase tracking-widest font-extrabold">
                         Actions
                       </th>
                     </tr>
@@ -246,7 +246,7 @@ export default function AllShipmentFeed() {
                         </td>
                         <td className="p-4">
                           <div className="text-sm font-bold text-[#001736]">
-                            {shipment.origin?.city}
+                            {shipment.pickupAddress || shipment.sender?.address}
                           </div>
                           <div className="text-[10px] text-[#43474f] uppercase tracking-tighter">
                             {shipment.origin?.hub}
@@ -254,8 +254,9 @@ export default function AllShipmentFeed() {
                         </td>
 
                         <td className="p-4">
-                          <div className="text-sm font-bold text-[#001736]">
-                            {shipment.destination?.city}
+                          <div className="text-sm font-bold text-[#6f22af]">
+                            {shipment.deliveryAddress ||
+                              shipment.receiver?.address}
                           </div>
                           <div className="text-[10px] text-[#43474f] uppercase tracking-tighter">
                             {shipment.destination?.hub}
@@ -270,7 +271,9 @@ export default function AllShipmentFeed() {
 
                         <td className="p-4">
                           <div className="text-sm font-bold text-[#001736]">
-                            {shipment.eta}
+                            {shipment.eta?.etaDays
+                              ? `${shipment.eta.etaDays} days`
+                              : "N/A"}
                           </div>
                         </td>
 

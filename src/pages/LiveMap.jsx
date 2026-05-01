@@ -2,7 +2,7 @@ import React, { useEffect, useMemo } from "react";
 import { useNavigate, useLocation, useParams } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import axiosClient from "../utils/axiosClient";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 
 import ShipmentMap from "../components/ShipmentMap";
 import socket from "../utils/Socket";
@@ -61,18 +61,18 @@ export default function ShipmentDetail() {
   });
 
   /* ================= LOGIC ================= */
-  const route = shipment?.route || [];
+  const route = shipment?.map?.route || [];
   const routeIndex = shipment?.routeIndex || 0;
 
   const progress = useMemo(() => {
-    if (!route.length || route.length === 1) return 0;
+    if (!route.length) return 0;
     return Math.min(100, Math.round((routeIndex / (route.length - 1)) * 100));
   }, [routeIndex, route]);
 
   const formattedStatus = shipment?.status?.replace("_", " ")?.toUpperCase();
 
   const formattedAddress =
-    shipment?.address?.formattedAddress ||
+    shipment?.map?.currentLocation?.formattedAddress ||
     shipment?.pickupAddress ||
     "No location";
 
@@ -113,7 +113,7 @@ export default function ShipmentDetail() {
           <div className="absolute inset-0 bg-cover bg-center rounded-lg opacity-80 group-hover:scale-110 transition-transform duration-700">
             <ShipmentMap
               route={route}
-              currentLocation={shipment?.currentLocation}
+              currentLocation={shipment?.map?.currentLocation}
               routeIndex={routeIndex}
               shipmentId={shipmentId}
               address={formattedAddress}

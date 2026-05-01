@@ -123,6 +123,9 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
             <NavButton to="/admin/message" icon={Plus}>
               Live Chat
             </NavButton>
+            <NavButton to="/admin/view-in-fleet" icon={Truck}>
+              view-in-fleet
+            </NavButton>
           </div>
         </div>
 

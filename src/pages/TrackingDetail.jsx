@@ -20,7 +20,9 @@ export default function TrackingDetail() {
   const { data, isLoading, isError } = useQuery({
     queryKey: ["tracking", trackingId],
     queryFn: async () => {
-      const res = await axiosClient.get(`/api/v1/shipments/track/${trackingId}`);
+      const res = await axiosClient.get(
+        `/api/v1/shipments/track/${trackingId}`,
+      );
       return res.data.data;
     },
     enabled: !!trackingId,
@@ -170,7 +172,7 @@ export default function TrackingDetail() {
                     Full Name
                   </p>
                   <p className="text-lg font-extrabold text-[#001736]">
-                    {data.sender.fullName}
+                    {data.sender.name}
                   </p>
                 </div>
                 <div>
@@ -269,7 +271,7 @@ export default function TrackingDetail() {
                     Full Name
                   </p>
                   <p className="text-lg font-extrabold text-[#001736]">
-                    {data.receiver.fullName}
+                    {data.receiver.name}
                   </p>
                 </div>
                 <div>

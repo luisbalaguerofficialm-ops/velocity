@@ -1,6 +1,7 @@
+import { useState } from "react";
 import axiosClient from "../utils/axiosClient";
 import { useMutation } from "@tanstack/react-query";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 
 export default function ContactUs() {
   const [formData, setFormData] = useState({
@@ -9,15 +10,14 @@ export default function ContactUs() {
     subject: "General Logistics Inquiry",
     message: "",
   });
-
   const mutation = useMutation({
     mutationFn: async (data) => {
-      const res = await axiosClient.post("/contact", data);
+      const res = await axiosClient.post("/api/v1/notifications/contact", data);
       return res.data;
     },
 
     onSuccess: (data) => {
-      toast.success("Message sent successfully 🚀");
+      toast.success(data.message || "Message sent successfully 🚀");
 
       setFormData({
         name: "",
@@ -39,7 +39,14 @@ export default function ContactUs() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    mutate(formData);
+
+    if (!formData.name || !formData.email || !formData.message) {
+      toast.error(
+        "Email and massage are required, Please fill in all required fields",
+      );
+      return;
+    }
+    mutation.mutate(formData);
   };
 
   return (
@@ -95,6 +102,7 @@ export default function ContactUs() {
                     <input
                       className="w-full bg-[#ffffff] border-0 border-b-2 border-[#c4c6d0] focus:border-[#006d36] focus:ring-0 transition-all px-0 py-3 text-primary font-medium"
                       placeholder="John Doe"
+                      name="name"
                       type="text"
                       value={formData.name}
                       onChange={handleChange}
@@ -107,6 +115,7 @@ export default function ContactUs() {
                     <input
                       className="w-full bg-[#ffffff] border-0 border-b-2 border-[#c4c6d0] focus:border-[#006d36] focus:ring-0 transition-all px-0 py-3 text-primary font-medium"
                       placeholder="j.doe@velocity.com"
+                      name="email"
                       type="email"
                       value={formData.email}
                       onChange={handleChange}
@@ -137,13 +146,16 @@ export default function ContactUs() {
                     className="w-full bg-[#ffffff] border-0 border-b-2 border-[#c4c6d0] focus:border-[#006d36] focus:ring-0 transition-all px-0 py-3 text-[#001736] font-medium resize-none"
                     placeholder="How can our network serve yours?"
                     rows="4"
+                    name="message"
                     value={formData.message}
                     onChange={handleChange}
                   ></textarea>
                 </div>
                 <button
                   type="submit"
-                  disabled={mutation.isPending}
+                  disabled={
+                    mutation.isPending || !formData.email || !formData.message
+                  }
                   className="w-full kinetic-gradient text-[#ffffff] py-5 rounded-xl font-bold tracking-wide flex items-center justify-center gap-3 group transition-all"
                 >
                   {mutation.isPending

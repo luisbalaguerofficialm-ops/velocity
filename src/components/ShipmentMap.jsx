@@ -1,5 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { GoogleMap, Polyline, Marker } from "@react-google-maps/api";
+import {
+  GoogleMap,
+  Polyline,
+  Marker,
+  useJsApiLoader,
+} from "@react-google-maps/api";
 import axiosClient from "../utils/axiosClient";
 
 const containerStyle = {
@@ -15,9 +20,13 @@ export default function ShipmentMap({
 }) {
   const [animatedPosition, setAnimatedPosition] = useState(null);
 
-  /* ================= BACKEND MAP CONFIG (NO ENV KEY) ================= */
+  /* ================= LOAD GOOGLE MAP ================= */
+  const { isLoaded } = useJsApiLoader({
+    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
+  });
+
+  /* ================= BACKEND MAP CONFIG ================= */
   useEffect(() => {
-    // optional: fetch map config from backend if needed later
     axiosClient.get("/api/v1/maps/config").catch(() => {});
   }, []);
 
@@ -41,8 +50,14 @@ export default function ShipmentMap({
     };
 
     animate();
-    return () => cancelAnimationFrame(frame);
+
+    return () => {
+      if (frame) cancelAnimationFrame(frame);
+    };
   }, [currentLocation]);
+
+  /* ================= WAIT FOR MAP ================= */
+  if (!isLoaded) return <p>Loading map...</p>;
 
   const center = animatedPosition || route?.[0] || { lat: 6.5244, lng: 3.3792 };
 
@@ -59,12 +74,12 @@ export default function ShipmentMap({
         />
       )}
 
-      {/* 🚚 DEFAULT GOOGLE MARKER (NO IMAGE URL) */}
-      {animatedPosition && (
+      {/* 🚚 LIVE MARKER */}
+      {animatedPosition && window.google && (
         <Marker
           position={animatedPosition}
           icon={{
-            path: google.maps.SymbolPath.CIRCLE,
+            path: window.google.maps.SymbolPath.CIRCLE,
             scale: 8,
             fillColor: "#00a86b",
             fillOpacity: 1,

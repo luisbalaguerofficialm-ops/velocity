@@ -1,10 +1,53 @@
-import React from "react";
+import React, { useRef } from "react";
+import axiosClient from "../utils/axiosClient";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 export default function AdminProfile() {
+  const fileInputRef = useRef();
+  const queryClient = useQueryClient();
+
+  const { data, isLoading } = useQuery({
+    queryKey: [`admin-Profile`],
+    queryFn: async () => {
+      const response = await axiosClient.get(`/api/v1/admin/profile`);
+      return response.data.data;
+    },
+  });
+
+  const { mutate: miploadImage, isLoading: upLoading } = useMutation({
+    mutationFn: async (file) => {
+      const formData = new FormData();
+      formData.append("Image", file);
+      const response = await axiosClient.post(
+        "/api/v1/admin/profile/upload",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        },
+      );
+      return response.data;
+    },
+    onSuccess: () => {
+      toast.success("Profile image updated successfully!");
+      queryClient.invalidateQueries({ queryKey: [`admin-Profile`] });
+    },
+    onError: () => {
+      toast.error("Failed to upload profile image. Please try again.");
+    },
+  });
+
+  const handleFileChange = (event) => {
+    const file = event.target.files[0];
+    if (file) return loadImage(file);
+  };
+
   return (
     <div className="bg-[#e2fffe] text-[#002020] font-body min-h-screen">
       {/* <!-- Main Content Area --> */}
-      <main className="ml-72 pt-32 p-10 pb-20 max-w-7xl">
+      <main className="pt-32 p-10 pb-20 max-w-7xl">
         {/* s<!-- Profile Header Section --> */}
         <section className="flex flex-col md:flex-row items-start md:items-end justify-between gap-6 mb-16">
           <div className="flex items-center gap-8">
@@ -13,34 +56,28 @@ export default function AdminProfile() {
                 alt="Admin Avatar"
                 className="w-32 h-32 rounded-xl object-cover shadow-2xl ring-4 ring-white"
                 data-alt="close up professional headshot of a executive with focused expression in a high tech office environment"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuDN6pm8kxCqTmo1N6lrRmVqZ0XTTirfpe52U5aXhkZe-Eh-CpYRlBL04LLPTSim7hsWKgoo5tZ0PnhJ05E5yMB_tBvaJa3RdFPp0TKh11S1uEQjmlf3JkC2a-IIPHzl1HyGq0bUkWcjbMX7itOHt86tbS8U-oDkDQH5KJBrmCQGRDwtk8xyqJVTcwMW-uvGOdyINctFPOw-k0rDnqeeJarM3aLqsZrgYTOD458S6j4FMr996-QN1WwiJU2uXo5KNLud6TeFZaoRd-Gm"
+                src={
+                  data?.admin?.profileImage || "https://via.placeholder.com/150"
+                }
               />
-              <button className="absolute inset-0 bg-[#001736]/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-xl backdrop-blur-[2px]">
-                <div className="bg-white/90 p-2 rounded-lg shadow-xl flex items-center gap-2">
-                  <span
-                    className="material-symbols-outlined text-[#001736] text-xl"
-                    data-icon="photo_camera"
-                  >
-                    photo_camera
-                  </span>
-                  <span className="text-[10px] font-bold text-[#001736] uppercase">
-                    Upload image
-                  </span>
-                </div>
+              <input
+                type="file"
+                ref={fileInputRef}
+                className="hidden"
+                onChange={handleFileChange}
+                accept="image/*"
+                className="absolute inset-0 cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity"
+              />
+              <button
+                onClick={() => fileInputRef.current.click()}
+                className="absolute -bottom-14 h-8 w-32 -right-1 hover:bg-emerald-900 bg-emerald-500 text-white p-1 rounded-lg shadow-lg z-10"
+              >
+                {upLoading ? "Uploading..." : "Upload Image"}
               </button>
-              <div className="absolute -bottom-2 -right-2 bg-emerald-500 text-white p-2 rounded-lg shadow-lg z-10">
-                <span
-                  className="material-symbols-outlined text-sm"
-                  data-icon="verified"
-                  style={{ fontVariationSettings: "'FILL' 1" }}
-                >
-                  verified
-                </span>
-              </div>
             </div>
             <div>
               <h2 className="text-4xl font-extrabold text-[#001736] tracking-tight mb-1">
-                Alex Sterling
+                {data?.admin?.name}
               </h2>
               <p className="text-lg text-[#7594ca] font-medium mb-3">
                 Senior Ops Controller
@@ -74,18 +111,18 @@ export default function AdminProfile() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-y-8 gap-x-12">
                 <div className="space-y-1">
                   <label className="text-[10px] font-black uppercase tracking-widest text-[#43474f]">
-                    Legal Full Name
+                    Full Name
                   </label>
                   <p className="text-[#001736] font-bold">
-                    Alex Sterling-Grant
+                    {data?.admin?.name}
                   </p>
                 </div>
                 <div className="space-y-1">
                   <label className="text-[10px] font-black uppercase tracking-widest text-[#43474f]">
-                    Operational Email
+                    Email Address
                   </label>
                   <p className="text-[#001736] font-bold">
-                    a.sterling@velocity-transit.io
+                    {data?.admin?.email}
                   </p>
                 </div>
                 <div className="space-y-1">
@@ -93,7 +130,7 @@ export default function AdminProfile() {
                     Terminal ID
                   </label>
                   <p className="font-mono text-[#006d36] font-bold">
-                    VEL-ADMIN-001
+                    {data?.admin?.terminalId}
                   </p>
                 </div>
                 <div className="space-y-1">
@@ -101,7 +138,7 @@ export default function AdminProfile() {
                     Assigned Node
                   </label>
                   <p className="text-[#001736] font-bold">
-                    EMEA Central Hub / London
+                    {data?.admin?.assignedNode}
                   </p>
                 </div>
               </div>
@@ -134,7 +171,14 @@ export default function AdminProfile() {
                       </p>
                     </div>
                   </div>
-                  <button className="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none bg-[#006d36]">
+                  <button
+                    onClick={() =>
+                      updatePreferences({
+                        realTimeAlerts: !data.preferences.realTimeAlerts,
+                      })
+                    }
+                    className="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none bg-[#006d36]"
+                  >
                     <span className="translate-x-5 pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"></span>
                   </button>
                 </div>
@@ -166,7 +210,7 @@ export default function AdminProfile() {
           </div>
           {/* <!-- Right Column: Security --> */}
           <div className="lg:col-span-4">
-            <div className="bg-primary p-8 rounded-[2rem] shadow-2xl shadow-[#001736]/30 text-white h-full">
+            <div className="bg-[#001736] p-8 rounded-[2rem] shadow-2xl shadow-[#001736]/30 text-white h-full">
               <div className="flex items-center gap-3 mb-8">
                 <span
                   className="material-symbols-outlined text-emerald-400"

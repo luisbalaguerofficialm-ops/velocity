@@ -13,6 +13,10 @@ export default function UpdateStatusSuccess() {
   const newStatus = status || shipment?.status || "UPDATED";
   const updatedAt = new Date().toLocaleString();
 
+  const handleShipmentDetail = (shipment) => {
+    navigate(`/admin/shipment-detail/${shipment._id}`);
+  };
+
   return (
     <div class="bg-[#e2fffe] text-[#002020] min-h-screen flex overflow-hidden">
       <main class="flex-1 overflow-y-auto p-12 flex flex-col items-center justify-center relative">
@@ -39,7 +43,7 @@ export default function UpdateStatusSuccess() {
             </h1>
             <p class="text-[#002020]/60 font-body text-md leading-relaxed mb-10 max-w-md">
               The operational manifest for{" "}
-              <span class="font-bold text-[#001736]">VEL-TX-99021</span> has
+              <span class="font-bold text-[#001736]">{trackingId}</span> has
               been synchronized with the global network.
             </p>
             {/* <!-- Summary Data Grid (Bento Style) --> */}
@@ -80,13 +84,13 @@ export default function UpdateStatusSuccess() {
             {/* <!-- Actions --> */}
             <div class="flex flex-col gap-3 w-full">
               <button
-                onClick={() => navigate(`/admin/shipments/${shipment?._id}`)}
+                onClick={() => handleShipmentDetail(shipment)}
                 className="w-full bg-[#006d36] text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-[#005227] transition"
               >
                 View Updated Shipment
                 <span className="material-symbols-outlined">arrow_forward</span>
               </button>
-              <div class="grid grid-cols-2 gap-3">
+              {/* <div class="grid grid-cols-2 gap-3">
                 <button
                   onClick={() => navigate("/admin/shipments/activity")}
                   className="flex items-center justify-center gap-2 py-3 rounded-xl border border-[#c4c6d0] text-[#001736] font-semibold hover:bg-[#d2f5f4] transition"
@@ -105,7 +109,7 @@ export default function UpdateStatusSuccess() {
                   </span>
                   Operations
                 </button>
-              </div>
+              </div> */}
             </div>
           </div>
           {/* <!-- Subtle Decorative Floating Map Element --> */}

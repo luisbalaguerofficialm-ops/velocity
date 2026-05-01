@@ -1,11 +1,12 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router";
-import { useMutation } from "@tanstack/react-query";
-import { toast } from "react-toastify";
-import { sendNotificationAPI } from "../services/notificationService";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import axiosClient from "../utils/axiosClient";
 
 export default function Notifications() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const [formData, setFormData] = useState({
     receiverEmail: "",
@@ -18,11 +19,24 @@ export default function Notifications() {
     navigate("/admin/Notification-History");
   };
 
+  // Fetch stats and recent activity
+  const { data: activityData } = useQuery({
+    queryKey: ["notifications-activity"],
+    queryFn: async () => {
+      const res = await axiosClient.get("/api/v1/notifications");
+      return res.data;
+    },
+  });
+
+  const recentLogs = activityData?.data?.slice(0, 5) || [];
+  const stats = activityData?.stats || {};
+
   // React Query Mutation
   const { mutate, isPending } = useMutation({
-    mutationFn: sendNotificationAPI,
-    onSuccess: (data) => {
+    mutationFn: (data) => axiosClient.post("/api/v1/notifications/send", data),
+    onSuccess: () => {
       toast.success("Notification sent successfully");
+      queryClient.invalidateQueries({ queryKey: ["notifications-activity"] });
       setFormData({
         receiverEmail: "",
         title: "",
@@ -178,14 +192,18 @@ export default function Notifications() {
                         onClick={() =>
                           setFormData({ ...formData, channel: "in_app" })
                         }
-                        className="flex items-center gap-3 px-8 py-4 rounded-2xl bg-[#83fba5] text-[#00743a] font-extrabold border-2 border-transparent shadow-sm"
+                        className={`flex items-center gap-3 px-8 py-4 rounded-2xl font-extrabold border-2 border-transparent shadow-sm transition-all ${
+                          formData.channel === "in_app"
+                            ? "bg-[#83fba5] text-[#00743a]"
+                            : "bg-[#c6e9e9]/50 text-[#43474f] hover:bg-[#c6e9e9]"
+                        }`}
                         type="button"
                       >
                         <span
                           className="material-symbols-outlined text-[22px]"
                           style={{ fontVariationSettings: "'FILL' 1" }}
                         >
-                          mail
+                          chat_bubble
                         </span>
                         In-App
                       </button>
@@ -194,14 +212,18 @@ export default function Notifications() {
                         onClick={() =>
                           setFormData({ ...formData, channel: "email" })
                         }
-                        className="flex items-center gap-3 px-8 py-4 rounded-2xl bg-[#c6e9e9]/50 text-[#43474f] font-extrabold hover:bg-[#c6e9e9] border-2 border-transparent shadow-sm"
+                        className={`flex items-center gap-3 px-8 py-4 rounded-2xl font-extrabold border-2 border-transparent shadow-sm transition-all ${
+                          formData.channel === "email"
+                            ? "bg-[#83fba5] text-[#00743a]"
+                            : "bg-[#c6e9e9]/50 text-[#43474f] hover:bg-[#c6e9e9]"
+                        }`}
                         type="button"
                       >
                         <span
                           className="material-symbols-outlined text-[22px]"
                           style={{ fontVariationSettings: "'FILL' 1" }}
                         >
-                          mail
+                          alternate_email
                         </span>
                         email
                       </button>
@@ -210,7 +232,11 @@ export default function Notifications() {
                         onClick={() =>
                           setFormData({ ...formData, channel: "sms" })
                         }
-                        className="flex items-center gap-3 px-8 py-4 rounded-2xl bg-[#c6e9e9]/50 text-[#43474f] font-extrabold hover:bg-[#c6e9e9] transition-colors"
+                        className={`flex items-center gap-3 px-8 py-4 rounded-2xl font-extrabold border-2 border-transparent shadow-sm transition-all ${
+                          formData.channel === "sms"
+                            ? "bg-[#83fba5] text-[#00743a]"
+                            : "bg-[#c6e9e9]/50 text-[#43474f] hover:bg-[#c6e9e9]"
+                        }`}
                         type="button"
                       >
                         <span className="material-symbols-outlined text-[22px]">
@@ -222,7 +248,11 @@ export default function Notifications() {
                         onClick={() =>
                           setFormData({ ...formData, channel: "push" })
                         }
-                        className="flex items-center gap-3 px-8 py-4 rounded-2xl bg-[#c6e9e9]/50 text-[#43474f] font-extrabold hover:bg-[#c6e9e9] transition-colors"
+                        className={`flex items-center gap-3 px-8 py-4 rounded-2xl font-extrabold border-2 border-transparent shadow-sm transition-all ${
+                          formData.channel === "push"
+                            ? "bg-[#83fba5] text-[#00743a]"
+                            : "bg-[#c6e9e9]/50 text-[#43474f] hover:bg-[#c6e9e9]"
+                        }`}
                         type="button"
                       >
                         <span className="material-symbols-outlined text-[22px]">
@@ -301,7 +331,7 @@ export default function Notifications() {
                   Total Dispatches
                 </p>
                 <h3 className="text-5xl font-extrabold tracking-tighter">
-                  1,284
+                  {stats.total || 0}
                 </h3>
               </div>
               <div className="bg-[#83fba5] p-10 rounded-[40px] shadow-lg">
@@ -317,7 +347,7 @@ export default function Notifications() {
                   Delivered Today
                 </p>
                 <h3 className="text-5xl font-extrabold tracking-tighter text-[#00743a]">
-                  99.8%
+                  {stats.delivered || 0}
                 </h3>
               </div>
             </div>

@@ -13,24 +13,23 @@ export default function NotificationHistory() {
      📡 FETCH NOTIFICATIONS
   ====================================================== */
   const { data, isLoading } = useQuery({
-    queryKey: ["notifications-history", page],
+    queryKey: ["notifications-history", page, search],
     queryFn: async () => {
-      const res = await axiosClient.get("/api/v1/notifications");
+      const res = await axiosClient.get("/api/v1/notifications", {
+        params: {
+          page,
+          limit: 5,
+          search: search.trim() || undefined,
+        },
+      });
       return res.data;
     },
-    keepPreviousData: true,
+    placeholderData: (previousData) => previousData,
   });
 
   const notifications = data?.data || [];
   const stats = data?.stats || {};
   const pagination = data?.pagination || {};
-
-  /* ======================================================
-     🔍 SEARCH FILTER (FRONTEND)
-  ====================================================== */
-  const filtered = notifications.filter((item) =>
-    item.title?.toLowerCase().includes(search.toLowerCase()),
-  );
 
   return (
     <div className="bg-[#e2fffe] text-[#002020] min-h-screen">
@@ -52,7 +51,10 @@ export default function NotificationHistory() {
               </span>
               <input
                 value={search}
-                onChange={(e) => setSearch(e.target.value)}
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                  setPage(1); // Reset to page 1 on new search
+                }}
                 className="bg-transparent border-none focus:ring-0 text-sm font-medium text-[#001736] placeholder:text-slate-400 w-64"
                 placeholder="Search ..."
                 type="text"
@@ -104,65 +106,95 @@ export default function NotificationHistory() {
                 </tr>
               </thead>
               <tbody class="divide-y divide-[#c4c6d0]/10">
-                {filtered.map((notification) => (
-                  <tr
-                    key={notification._id}
-                    onClick={() => navigate(`/admin/messages/${item._id}`)}
-                    class="hover:bg-[#d2f5f4]/30 transition-colors"
-                  >
-                    <td class="px-6 py-4">
-                      <div class="flex flex-col">
-                        <span class="text-sm font-bold text-[#001736]">
-                          {item.title}
-                        </span>
-                      </div>
-                    </td>
-                    <td class="px-6 py-4">
-                      <div class="flex gap-2">
-                        <span class="px-2 py-1 bg-[#001736] text-white text-[10px] font-bold rounded uppercase">
-                          {item.channel || item.type}
-                        </span>
-                      </div>
-                    </td>
-                    <td class="px-6 py-4">
-                      <span class="text-sm font-medium text-[#002020]">
-                        {item.targetAudience || item.email}
-                      </span>
-                    </td>
-                    <td class="px-6 py-4 text-center">
-                      <span class="text-sm font-extrabold text-[#001736]">
-                        1,402
-                      </span>
-                    </td>
-                    <td class="px-6 py-4">
-                      <div class="flex flex-col">
-                        <span class="text-sm font-bold text-[#001736]">
-                          {item.sentCount || 1}
-                        </span>
-                      </div>
-                    </td>
-                    <td class="px-6 py-4">
-                      <div class="flex items-center gap-2">
-                        <span class="text-sm font-medium text-[#001736]">
-                          {new Date(item.createdAt).toLocaleString()}
-                        </span>
-                      </div>
-                    </td>
-                    <td class="px-6 py-4">
-                      <div class="flex items-center gap-2 text-[#006d36]">
-                        <span class="w-2 h-2 rounded-full bg-[#006d36]"></span>
-                        <span class="text-xs font-bold uppercase tracking-wider">
-                          <StatusBadge status={item.status} />
-                        </span>
-                      </div>
-                    </td>
-                    <td class="px-6 py-4 text-right">
-                      <button class="text-[#001736] hover:text-[#00743a] transition-colors">
-                        <span class="material-symbols-outlined">more_vert</span>
-                      </button>
+                {isLoading ? (
+                  <tr>
+                    <td
+                      colSpan="8"
+                      className="px-6 py-10 text-center animate-pulse font-bold text-slate-400"
+                    >
+                      Synchronizing Ledger...
                     </td>
                   </tr>
-                ))}
+                ) : notifications.length > 0 ? (
+                  notifications.map((notification) => (
+                    <tr
+                      key={notification._id}
+                      onClick={() =>
+                        navigate(`/admin/message/${notification._id}`)
+                      }
+                      class="hover:bg-[#d2f5f4]/30 transition-colors cursor-pointer"
+                    >
+                      <td class="px-6 py-4">
+                        <div class="flex flex-col">
+                          <span class="text-sm font-bold text-[#001736]">
+                            {notification.title}
+                          </span>
+                        </div>
+                      </td>
+                      <td class="px-6 py-4">
+                        <div class="flex gap-2">
+                          <span class="px-2 py-1 bg-[#001736] text-white text-[10px] font-bold rounded uppercase">
+                            {notification.channel || "email"}
+                          </span>
+                        </div>
+                      </td>
+                      <td class="px-6 py-4">
+                        <span class="text-sm font-medium text-[#002020]">
+                          {notification.targetAudience ||
+                            notification.receiverEmail}
+                        </span>
+                      </td>
+                      <td class="px-6 py-4 text-center">
+                        <span class="text-sm font-extrabold text-[#001736]">
+                          {notification.sentCount || 1}
+                        </span>
+                      </td>
+                      <td class="px-6 py-4">
+                        <span class="text-sm font-medium text-[#001736]">
+                          {new Date(
+                            notification.createdAt,
+                          ).toLocaleDateString()}
+                          <span className="block text-[10px] opacity-50">
+                            {new Date(
+                              notification.createdAt,
+                            ).toLocaleTimeString([], {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
+                          </span>
+                        </span>
+                      </td>
+                      <td class="px-6 py-4">
+                        <span class="text-sm font-bold text-[#001736]">
+                          {notification.createdBy || "System Auto"}
+                        </span>
+                      </td>
+                      <td class="px-6 py-4">
+                        <div class="flex items-center gap-2 text-[#006d36]">
+                          <span class="text-xs font-bold uppercase tracking-wider">
+                            <StatusBadge status={notification.status} />
+                          </span>
+                        </div>
+                      </td>
+                      <td class="px-6 py-4 text-right">
+                        <button class="text-[#001736] hover:text-[#00743a] transition-colors">
+                          <span class="material-symbols-outlined">
+                            more_vert
+                          </span>
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td
+                      colSpan="8"
+                      className="px-6 py-10 text-center text-slate-400 italic"
+                    >
+                      No transmission records found in this sector.
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>

@@ -9,11 +9,10 @@ const axiosClient = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
-  // This allows axios to send cookies (refresh token) with every request if needed
   withCredentials: true,
 });
 
-// ================= REQUEST INTERCEPTOR =================
+// ================= REQUEST =================
 axiosClient.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("accessToken");
@@ -23,49 +22,54 @@ axiosClient.interceptors.request.use(
   (error) => Promise.reject(error),
 );
 
-// ================= RESPONSE INTERCEPTOR =================
+// ================= RESPONSE =================
 axiosClient.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
 
-    // Check for 401 and ensure we aren't already retrying
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // 🔥 Handle network/CORS errors
+    if (!error.response) {
+      toast.error("Network error. Check backend or CORS.");
+      return Promise.reject(error);
+    }
+
+    if (
+      error.response.status === 401 &&
+      !originalRequest._retry &&
+      !originalRequest.url.includes("refresh-token")
+    ) {
       originalRequest._retry = true;
 
       try {
-        // 🔹 Refreshing using Cookies (HttpOnly)
-        // We don't send a body because the backend reads req.cookies.refreshToken
         const refreshRes = await axios.post(
-          `${API_URL}/api/auth/refresh-token`,
+          `${API_URL}/api/v1/admin/refresh-token`,
           {},
-          { withCredentials: true },
+          { withCredentials: true }, 
         );
 
-        // Access the data based on your backend responseHandler structure
         const { accessToken } = refreshRes.data.data;
 
-        // 🔹 Update local state
         localStorage.setItem("accessToken", accessToken);
 
-        // 🔹 Sync Socket
+        // 🔌 Sync socket
         socket.auth = { token: accessToken };
         if (socket.connected) {
           socket.disconnect();
           socket.connect();
         }
 
-        // 🔹 Retry original request
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;
         return axiosClient(originalRequest);
       } catch (refreshError) {
-        // Refresh failed (cookie expired or invalid)
         toast.error("Session expired. Please login again.");
+
         localStorage.removeItem("accessToken");
-        // No need to clear refreshToken from localStorage as it's in a cookie
 
         if (socket.connected) socket.disconnect();
-        window.location.href = "/login";
+
+        window.location.href = "/signin"; 
+
         return Promise.reject(refreshError);
       }
     }
@@ -78,10 +82,11 @@ axiosClient.interceptors.response.use(
   },
 );
 
+// ================= LOGOUT =================
 export const logout = () => {
   localStorage.removeItem("accessToken");
   if (socket.connected) socket.disconnect();
-  window.location.href = "/login";
+  window.location.href = "/signin"; // ✅ FIXED
 };
 
 export default axiosClient;

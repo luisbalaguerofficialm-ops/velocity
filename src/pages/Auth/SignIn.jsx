@@ -1,18 +1,22 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Link, useNavigate } from "react-router-dom";
 import axiosClient from "../../utils/axiosClient";
-import { toast } from "react-hot-toast";
+import { toast } from "sonner";
+import { MdVisibilityOff, MdVisibility } from "react-icons/md";
 import google from "../../assets/goolge.png";
 
 export default function SignIn() {
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
 
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const { email, password } = formData;
 
   const handleChange = (e) => {
     setFormData((prev) => ({
@@ -22,36 +26,47 @@ export default function SignIn() {
   };
 
   /* =========================
-     LOGIN MUTATION
+     SUBMIT HANDLER (NO REACT QUERY)
   ========================= */
-  const loginMutation = useMutation({
-    mutationFn: async (data) => {
-      const res = await axiosClient.post("/api/v1/admin/login", data);
-      return res.data.data;
-    },
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-    onSuccess: (data) => {
-      const { accessToken, admin } = data;
+    // ✅ Validation
+    if (!email || !password) {
+      return toast.error("Please fill in all fields");
+    }
 
+    if (!email.includes("@")) {
+      return toast.error("Enter a valid email");
+    }
+
+    if (password.length < 6) {
+      return toast.error("Password must be at least 6 characters");
+    }
+
+    try {
+      setLoading(true);
+
+      const res = await axiosClient.post("/api/v1/admin/login", {
+        email,
+        password,
+      });
+
+      const { accessToken, admin } = res.data.data;
+
+      // ✅ Store token
       localStorage.setItem("accessToken", accessToken);
-
-      // store admin in react query cache
-      queryClient.setQueryData(["me"], admin);
 
       toast.success(`Welcome back, ${admin.name}`);
 
+      // ✅ Redirect
       navigate("/admin");
-    },
-
-    onError: (error) => {
+    } catch (error) {
       const msg = error?.response?.data?.message || "Login failed. Try again.";
       toast.error(msg);
-    },
-  });
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    loginMutation.mutate(formData);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -122,19 +137,18 @@ export default function SignIn() {
                 <div className="space-y-1">
                   <label
                     className="text-xs font-bold uppercase tracking-[0.05rem] text-[#001736]/70 block"
-                    for="email"
+                    htmlFor="email"
                   >
                     Corporate Email
                   </label>
                   <div className="relative group">
                     <input
-                      className="w-full bg-[#ffffff] border-0 border-b-2 border-[#c4c6d0] focus:border-[#006d36] focus:ring-0 px-0 py-3 transition-all text-[#001736] font-medium placeholder:text-[#c4c6d0]/50"
                       id="email"
-                      required
-                      placeholder="name@velocity.com"
                       type="email"
-                      value={formData.email}
+                      value={email}
                       onChange={handleChange}
+                      placeholder="name@company.com"
+                      className="w-full bg-[#ffffff] border-0 border-b-2 border-[#c4c6d0] focus:border-[#006d36] focus:ring-0 px-0 py-3 transition-all text-[#001736] font-medium placeholder:text-[#c4c6d0]/50"
                     />
                   </div>
                 </div>
@@ -143,7 +157,7 @@ export default function SignIn() {
                   <div className="flex justify-between items-end">
                     <label
                       className="text-xs font-bold uppercase tracking-[0.05rem] text-[#001736]/70 block"
-                      for="password"
+                      htmlFor="password"
                     >
                       Secure Password
                     </label>
@@ -157,24 +171,29 @@ export default function SignIn() {
                   </div>
                   <div className="relative group">
                     <input
-                      className="w-full bg-[#ffffff] border-0 border-b-2 border-[#c4c6d0] focus:border-[#006d36] focus:ring-0 px-0 py-3 transition-all text-[#001736] font-medium placeholder:text-[#c4c6d0]/50"
                       id="password"
-                      required
-                      placeholder="••••••••"
-                      type="password"
-                      value={formData.password}
+                      type={showPassword ? "text" : "password"}
+                      value={password}
                       onChange={handleChange}
+                      className="w-full bg-[#ffffff] border-0 border-b-2 border-[#c4c6d0] focus:border-[#006d36] focus:ring-0 px-0 py-3 transition-all text-[#001736] font-medium placeholder:text-[#c4c6d0]/50"
                     />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-5 text-gray-500"
+                    >
+                      {showPassword ? <MdVisibilityOff /> : <MdVisibility />}
+                    </button>
                   </div>
                 </div>
               </div>
               <div className="space-y-4 pt-4">
                 <button
-                  disabled={loginMutation.isPending}
                   type="submit"
-                  className="w-full py-4 bg-[#006d36] text-white font-bold rounded-xl"
+                  disabled={loading}
+                  className="w-full py-3 bg-[#006d36] text-white font-bold rounded-xl hover:bg-[#005227] disabled:opacity-60"
                 >
-                  {loginMutation.isPending ? "Signing in..." : "Sign In"}
+                  {loading ? "Signing in..." : "Sign In"}
                 </button>
                 <div className="relative py-4">
                   <div className="absolute inset-0 flex items-center">
@@ -188,11 +207,11 @@ export default function SignIn() {
                 </div>
                 <div className="items-center justify-center gap-2 w-full flex">
                   <button
-                    className="flex w-full items-center justify-center gap-3 py-3 px-4 bg-[#c6e9e9] hover:bg-[#bee1e0] transition-colors rounded-xl text-[#001736] font-bold text-sm uppercase tracking-wide"
                     type="button"
+                    className="w-full flex items-center justify-center gap-2 py-3 bg-gray-100 rounded-xl"
                   >
-                    <img src={google} alt="" class="w-9 h-9" />
-                    <span className="">google</span>
+                    <img src={google} alt="google" className="w-6 h-6" />
+                    Continue with Google
                   </button>
                 </div>
               </div>
@@ -203,7 +222,7 @@ export default function SignIn() {
               </p>
               <Link
                 to="/auth/signup"
-                class="text-[#006d36] font-bold hover:underline"
+                className="text-[#006d36] font-bold hover:underline"
                 href="#"
               >
                 Sign Up

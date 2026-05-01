@@ -9,7 +9,6 @@ export default function CourierRegistrationSuccess() {
   const location = useLocation();
   const courier = location.state || {};
 
-
   const { id } = useParams();
 
   const courierId = id || courier?._id;
@@ -109,7 +108,7 @@ export default function CourierRegistrationSuccess() {
         {/* <!-- Asymmetric Detail Layout (Bento Style) --> */}
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6 w-full mb-12">
           {/* <!-- Main Profile Card --> */}
-          <div className="md:col-span-8 bg-[#ffffff] rounded-xl p-8 shadow-sm flex flex-col md:flex-row gap-8 items-center md:items-start">
+          <div class="md:col-span-8 bg-[#ffffff] rounded-xl p-8 shadow-sm flex flex-col md:flex-row gap-8 items-center md:items-start">
             <div className="relative">
               <img
                 src={
@@ -121,13 +120,7 @@ export default function CourierRegistrationSuccess() {
                 alt="profileImage"
                 className="w-32 h-32 rounded-xl object-cover"
               />
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => setImage(e.target.files[0])}
-              />
 
-              <button onClick={handleImageUpload}>Upload Profile Image</button>
               <div className="absolute -bottom-2 -right-2 bg-[#006d36] text-[#ffffff] px-3 py-1 rounded-lg text-xs font-bold tracking-wider uppercase">
                 Active
               </div>

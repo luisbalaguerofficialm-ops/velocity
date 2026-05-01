@@ -1,12 +1,17 @@
 @import "tailwindcss";
 
-/* Optional global styles */
+/* =========================
+   GLOBAL STYLES
+========================= */
 body {
   background-color: #f8f9fa;
   color: #111;
   font-family: "Inter", sans-serif;
 }
 
+/* =========================
+   LAYOUT HELPERS
+========================= */
 .hero-clip {
   clip-path: polygon(0 0, 100% 0, 100% 85%, 0% 100%);
 }
@@ -18,4 +23,69 @@ body {
 .glass-nav {
   background: rgba(255, 255, 255, 0.8);
   backdrop-filter: blur(20px);
+}
+
+/* =========================
+   ANIMATIONS (FIXED)
+========================= */
+
+/* Glow effect ONLY (no transform conflicts) */
+@keyframes pulseGlow {
+  0% {
+    box-shadow: 0 0 0 0 rgba(0, 109, 54, 0.6);
+  }
+  50% {
+    box-shadow: 0 0 0 12px rgba(0, 109, 54, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(0, 109, 54, 0);
+  }
+}
+
+/* Smooth attention bounce (better than shake for UX) */
+@keyframes softBounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+/* =========================
+   UTIL CLASSES
+========================= */
+
+/* Active shipment pulse (primary effect) */
+.animate-active-pulse {
+  animation: pulseGlow 1.6s infinite ease-in-out;
+}
+
+/* Optional stronger attention state */
+.animate-active-bounce {
+  animation: softBounce 1s infinite ease-in-out;
+}
+
+/* If you still want shake (optional, not recommended for UX) */
+@keyframes shake {
+  0% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-2px);
+  }
+  50% {
+    transform: translateX(2px);
+  }
+  75% {
+    transform: translateX(-2px);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+.animate-active-shake {
+  animation: shake 0.5s infinite;
 }

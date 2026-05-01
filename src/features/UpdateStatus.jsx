@@ -2,11 +2,15 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import axiosClient from "../utils/axiosClient";
 import { toast } from "react-toastify";
+import React, { useState } from "react";
+import { getShipmentStatusStyle } from "../utils/getShipmentStatusStyle";
 
-export default function EditShipment() {
+export default function UpdateStatus() {
   const { id } = useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const [selectedStatus, setSelectedStatus] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const { data: shipment, isLoading } = useQuery({
     queryKey: ["shipment", id],
@@ -17,23 +21,54 @@ export default function EditShipment() {
     },
   });
 
-  const handleAdvanceStatus = async () => {
+  const statusOptions = [
+    "pickup",
+    "in_transit",
+    "out_for_delivery",
+    "paused",
+    "delayed",
+    "delivered",
+  ];
+
+  const STATUS_FLOW = [
+    "pickup",
+    "in_transit",
+    "out_for_delivery",
+    "paused",
+    "delayed",
+    "delivered",
+  ];
+
+  const handleUpdateStatus = async () => {
+    if (!selectedStatus) {
+      toast.error("Please select a status");
+      return;
+    }
+
     try {
+      setLoading(true);
+
       const res = await axiosClient.patch(
         `/api/v1/shipments/${id}/advance-status`,
+        {
+          status: selectedStatus, // backend should support override
+        },
       );
 
-      toast.success("Shipment status advanced");
+      toast.success("Status updated successfully");
 
       queryClient.invalidateQueries({ queryKey: ["shipment", id] });
-      navigate("/admin/Update-Status-Success", {
+
+      navigate("/admin/update-status-success", {
         state: {
           shipment: res.data.shipment,
-          status: res.data.status,
+          status: res.data.shipment.status,
         },
       });
     } catch (err) {
       toast.error(err?.response?.data?.message || "Update failed");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -51,16 +86,16 @@ export default function EditShipment() {
             <div className="md:col-span-2 bg-[#d7fafa] p-8 rounded-[2rem] relative overflow-hidden">
               <div className="relative z-10">
                 <div className="flex items-center gap-3 mb-4">
-                  <span className="bg-[#83fba5] text-[#00743a] px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">
+                  <span className="bg-[#83fba5] text-[#00743a] px-3 py-1 rounded-full text-[20px] font-black uppercase tracking-widest">
                     {shipment?.status?.replace("_", " ") || "Unknown Status"}
                   </span>
-                  <span className="text-[#001736]/40 font-mono text-sm">
+                  <span className="text-[#001736] font-bold text-medium">
                     #{shipment?.trackingId}
                   </span>
                 </div>
                 <div className="flex items-end justify-between">
                   <div className="space-y-1">
-                    <p className="text-3xl font-extrabold text-[#001736] tracking-tighter">
+                    <p className="text-xl font-extrabold text-[#001736] tracking-tighter">
                       {shipment?.pickupAddress}
                     </p>
                     <p className="text-sm text-[#001736]/60">
@@ -74,9 +109,6 @@ export default function EditShipment() {
               <div>
                 <p className="text-[10px] uppercase tracking-[0.2em] text-white/50 mb-1">
                   Estimated Arrival
-                </p>
-                <p className="text-4xl font-light tracking-tighter">
-                  Oct 24, <span className="font-bold">14:30</span>
                 </p>
               </div>
               <div className="flex items-center gap-2 text-[#83fba5]">
@@ -93,29 +125,55 @@ export default function EditShipment() {
             </div>
           </section>
           {/* <!-- Progress Visualization --> */}
-          <section className="bg-white p-10 rounded-[2rem] flex justify-between relative">
+          <section className="bg-white p-10 rounded-[2rem] relative">
             <div className="absolute w-full h-1 bg-[#c6e9e9] top-1/2 left-0 -translate-y-1/2"></div>
-            <div className="absolute w-2/3 h-1 bg-[#006d36] top-1/2 left-0 -translate-y-1/2"></div>
 
-            {["Picked Up", "In Transit", "Out for Delivery", "Delivered"].map(
-              (step, i) => (
-                <div key={i} className="flex flex-col items-center z-10">
-                  <div
-                    className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold
-                  ${
-                    shipment?.status === step.toLowerCase().replace(" ", "_")
-                      ? "bg-[#006d36]"
-                      : "bg-[#e2fffe] text-[#001736]"
-                  }`}
-                  >
-                    {i + 1}
+            {/* Progress fill */}
+            <div
+              className="absolute h-1 bg-[#006d36] top-1/2 left-0 -translate-y-1/2 transition-all duration-500"
+              style={{
+                width: `${
+                  (STATUS_FLOW.indexOf(shipment?.status) /
+                    (STATUS_FLOW.length - 1)) *
+                  100
+                }%`,
+              }}
+            />
+
+            <div className="flex justify-between relative z-10">
+              {STATUS_FLOW.map((status, i) => {
+                const meta = getShipmentStatusStyle(status);
+
+                const currentIndex = STATUS_FLOW.indexOf(shipment?.status);
+                const isDone = currentIndex > i;
+                const isCurrent = shipment?.status === status;
+
+                return (
+                  <div key={status} className="flex flex-col items-center">
+                    {/* NODE */}
+                    <div
+                      className={`
+              w-10 h-10 rounded-full flex items-center justify-center font-bold transition-all duration-300
+              ${
+                isCurrent
+                  ? "bg-[#006d36] text-white scale-110 animate-active-shake"
+                  : isDone
+                    ? "bg-[#83fba5] text-[#00743a] animate-active-pulse"
+                    : "bg-[#e2fffe] text-[#001736]"
+              }
+            `}
+                    >
+                      {meta.icon}
+                    </div>
+
+                    {/* LABEL */}
+                    <span className="mt-4 text-[10px] font-black uppercase text-center">
+                      {meta.label}
+                    </span>
                   </div>
-                  <span className="mt-4 text-[10px] font-black uppercase">
-                    {step}
-                  </span>
-                </div>
-              ),
-            )}
+                );
+              })}
+            </div>
           </section>
           {/* <!-- Main Control Grid --> */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -138,12 +196,52 @@ export default function EditShipment() {
                     </span>
                   </p>
 
-                  <button
-                    onClick={handleAdvanceStatus}
-                    className="w-full py-4 bg-[#006d36] text-white rounded-xl font-bold uppercase tracking-widest"
-                  >
-                    Move to Next Stage
-                  </button>
+                  <div className="space-y-4">
+                    <label className="text-sm font-bold text-[#001736]">
+                      Select New Status
+                    </label>
+
+                    <select
+                      value={selectedStatus}
+                      onChange={(e) => setSelectedStatus(e.target.value)}
+                      className="w-full p-3 rounded-xl border border-gray-200 bg-white text-[#001736] font-medium"
+                    >
+                      <option value="">-- Choose Status --</option>
+
+                      {statusOptions.map((status) => (
+                        <option key={status} value={status}>
+                          {status.replaceAll("_", " ")}
+                        </option>
+                      ))}
+                    </select>
+
+                    {/* Preview with icons (THIS is where we use your meta helper properly) */}
+                    {selectedStatus && (
+                      <div className="mt-3">
+                        <span
+                          className={
+                            getShipmentStatusStyle(selectedStatus).className
+                          }
+                        >
+                          {getShipmentStatusStyle(selectedStatus).icon}{" "}
+                          {getShipmentStatusStyle(selectedStatus).label}
+                        </span>
+                      </div>
+                    )}
+
+                    <button
+                      onClick={handleUpdateStatus}
+                      disabled={loading}
+                      className={`w-full py-4 rounded-xl font-bold uppercase tracking-widest transition-all
+      ${
+        loading
+          ? "bg-gray-400 text-white"
+          : "bg-[#006d36] text-white hover:opacity-90"
+      }`}
+                    >
+                      {loading ? "Updating..." : "Update Status"}
+                    </button>
+                  </div>
                 </div>
 
                 {/* ================= AUDIT / INFO ================= */}

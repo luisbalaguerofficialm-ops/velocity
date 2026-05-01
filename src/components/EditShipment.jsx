@@ -2,7 +2,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import axiosClient from "../utils/axiosClient";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 
 export default function EditShipment() {
   const { id } = useParams();
@@ -75,17 +75,45 @@ export default function EditShipment() {
     }));
   };
 
+  const handleDiscard = () => {
+    navigate(-1);
+  };
+
   /* ================= SUBMIT ================= */
+  const [submitting, setSubmitting] = useState(false);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
-      await axiosClient.put(`/api/v1/shipments/${id}`, {
-        ...form,
-        shipmentType, 
-      });
+      setSubmitting(true);
 
-      toast.success("Shipment updated");
+      const payload = {
+        shipmentType,
+
+        sender: form.sender,
+        receiver: form.receiver,
+
+        pickupAddress: form.pickupAddress,
+        deliveryAddress: form.deliveryAddress,
+
+        package: form.package, // ✅ string only
+        weight: Number(form.weight),
+        quantity: Number(form.quantity),
+        declaredValue: Number(form.declaredValue),
+
+        dimensions: {
+          length: Number(form.dimensions.length),
+          width: Number(form.dimensions.width),
+          height: Number(form.dimensions.height),
+        },
+
+        status: form.status,
+      };
+
+      const res = await axiosClient.put(`/api/v1/shipments/${id}`, payload);
+
+      toast.success(res.data.message || "Shipment updated");
 
       queryClient.invalidateQueries({
         queryKey: ["shipment", id],
@@ -93,10 +121,12 @@ export default function EditShipment() {
 
       navigate(-1);
     } catch (err) {
-      toast.error("Update failed");
+      toast.error(err?.response?.data?.message || "Update failed");
+    } finally {
+      setSubmitting(false);
     }
   };
-
+  const isSelected = (type) => form.package === type;
   if (isLoading) return <p className="p-6">Loading...</p>;
   return (
     <div className="bg-[#f5f7f8] text-[#002020] flex overflow-hidden h-screen font-body">
@@ -117,12 +147,12 @@ export default function EditShipment() {
                 Back to shipments
               </div>
 
-              {/* ✅ TITLE */}
+              {/*  TITLE */}
               <h2 className="text-4xl font-extrabold text-[#001736] tracking-tight">
                 Edit Shipment
               </h2>
 
-              {/* ✅ DYNAMIC TRACKING + STATUS */}
+              {/*  DYNAMIC TRACKING + STATUS */}
               <p className="text-[#43474f] font-medium flex items-center gap-2">
                 Tracking ID:{" "}
                 <span className="text-[#001736] font-bold">
@@ -134,7 +164,7 @@ export default function EditShipment() {
               </p>
             </div>
 
-            {/* ✅ SEGMENT CONTROL */}
+            {/* SEGMENT CONTROL */}
             <div className="bg-[#d2f5f4] p-1 rounded-xl flex w-fit">
               <button
                 onClick={() => setShipmentType("inter-city")}
@@ -345,7 +375,12 @@ export default function EditShipment() {
                       <button
                         type="button"
                         onClick={() => updateField("package", "box")}
-                        className="flex flex-col items-center justify-center p-4 border border-[#c4c6d0]/30 rounded-xl hover:border-[#006d36]/50 transition-all bg-[#d7fafa] group"
+                        className={`flex flex-col items-center justify-center p-4 rounded-xl transition-all
+  ${
+    isSelected("box")
+      ? "border-2 border-[#006d36] bg-[#e2fffe]"
+      : "border border-[#c4c6d0]/30 bg-[#d7fafa] hover:border-[#006d36]/50"
+  }`}
                       >
                         <span
                           className="material-symbols-outlined text-2xl mb-1 text-[#43474f]  group-hover:text-[#006d36]"
@@ -357,10 +392,16 @@ export default function EditShipment() {
                           Box
                         </span>
                       </button>
+
                       <button
                         type="button"
                         onClick={() => updateField("package", "envelope")}
-                        className="flex flex-col items-center justify-center p-4 border-2 border-[#006d36] rounded-xl bg-[#e2fffe] transition-all"
+                        className={`flex flex-col items-center justify-center p-4 rounded-xl transition-all
+  ${
+    isSelected("envelope")
+      ? "border-2 border-[#006d36] bg-[#e2fffe]"
+      : "border border-[#c4c6d0]/30 bg-[#d7fafa] hover:border-[#006d36]/50"
+  }`}
                       >
                         <span
                           className="material-symbols-outlined text-2xl mb-1 text-[#006d36]"
@@ -376,7 +417,12 @@ export default function EditShipment() {
                       <button
                         type="button"
                         onClick={() => updateField("package", "pallet")}
-                        className="flex flex-col items-center justify-center p-4 border border-[#c4c6d0]/30 rounded-xl hover:border-[#006d36]/50 transition-all bg-[#d7fafa] group"
+                        className={`flex flex-col items-center justify-center p-4 rounded-xl transition-all
+  ${
+    isSelected("pallet")
+      ? "border-2 border-[#006d36] bg-[#e2fffe]"
+      : "border border-[#c4c6d0]/30 bg-[#d7fafa] hover:border-[#006d36]/50"
+  }`}
                       >
                         <span
                           className="material-symbols-outlined text-2xl mb-1 text-[#43474f]  group-hover:text-[#006d36]"
@@ -501,14 +547,14 @@ export default function EditShipment() {
                           Velocity Route
                         </p>
                         <p className="text-sm font-black text-[#001736]">
-                          Austin{" "}
+                          {form.pickupAddress}
                           <span
                             className="material-symbols-outlined text-[10px] align-middle"
                             data-icon="arrow_forward"
                           >
                             arrow_forward
                           </span>{" "}
-                          San Antonio
+                          {form.deliveryAddress}
                         </p>
                       </div>
                       <span
@@ -561,9 +607,15 @@ export default function EditShipment() {
               <div className="pt-4 space-y-4">
                 <button
                   type="submit"
-                  className="w-full py-5 bg-gradient-to-br from-[#006d36] to-[#001736] text-white font-extrabold text-lg rounded-xl shadow-[0_20px_40px_-10px_rgba(0,109,54,0.3)] flex items-center justify-center gap-3 active:scale-[0.98] transition-all"
+                  disabled={submitting}
+                  className={`w-full py-5 text-white font-extrabold text-lg rounded-xl flex items-center justify-center gap-3 transition-all
+  ${
+    submitting
+      ? "bg-gray-400"
+      : "bg-gradient-to-br from-[#006d36] to-[#001736] active:scale-[0.98]"
+  }`}
                 >
-                  Update Shipment
+                  {submitting ? "Updating..." : "Update Shipment"}
                 </button>
                 <button
                   type="button"

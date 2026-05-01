@@ -240,7 +240,7 @@ export default function ManageShipments() {
 
                       <td className="p-5 flex items-center gap-2">
                         <MapPin className="w-4 h-4 text-[#006d36]" />
-                        {s.destination || "N/A"}
+                        {s.deliveryAddress || "N/A"}
                       </td>
 
                       <td className="p-5 font-bold uppercase text-xs">
@@ -249,10 +249,22 @@ export default function ManageShipments() {
 
                       <td className="p-5">{s.serviceLevel}</td>
 
-                      <td className="p-5">{s.eta || "N/A"}</td>
+                      <td className="p-5">
+                        {s.eta?.etaDays ? (
+                          <span className="font-semibold text-[#006d36]">
+                            {s.eta.etaDays} days
+                          </span>
+                        ) : (
+                          <span className="text-[#43474f] italic">
+                            {s.eta?.type === "predicted"
+                              ? "Predicting..."
+                              : "N/A"}
+                          </span>
+                        )}
+                      </td>
 
                       {/* actions */}
-                      <td className="p-5 text-right space-x-2">
+                      <td className="p-5 flex items-center text-right space-x-2">
                         <button
                           onClick={() => handleView(s._id)}
                           className="p-2 hover:bg-white rounded-lg"

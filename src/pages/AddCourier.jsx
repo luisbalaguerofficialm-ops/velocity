@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import axiosClient from "../utils/axiosClient";
 import { useMutation } from "@tanstack/react-query";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 
 export default function AddCourier() {
@@ -13,6 +13,8 @@ export default function AddCourier() {
     sector: "",
   });
 
+  const [profileImage, setProfileImage] = useState(null);
+  const [errors, setErrors] = useState({});
   const navigate = useNavigate();
 
   const isFormValid =
@@ -22,18 +24,11 @@ export default function AddCourier() {
     formData.vehicle &&
     formData.sector;
 
-  const [errors, setErrors] = useState({});
-
   const validateForm = () => {
     const newErrors = {};
 
-    if (!formData.fullName.trim()) {
-      newErrors.fullName = "Full name is required";
-    }
-
-    if (!formData.phone.trim()) {
-      newErrors.phone = "Phone number is required";
-    }
+    if (!formData.fullName.trim()) newErrors.fullName = "Full name is required";
+    if (!formData.phone.trim()) newErrors.phone = "Phone number is required";
 
     if (!formData.email.trim()) {
       newErrors.email = "Email is required";
@@ -41,28 +36,36 @@ export default function AddCourier() {
       newErrors.email = "Invalid email format";
     }
 
-    if (!formData.vehicle) {
-      newErrors.vehicle = "Select a vehicle";
-    }
-
-    if (!formData.sector) {
-      newErrors.sector = "Select a sector";
-    }
+    if (!formData.vehicle) newErrors.vehicle = "Select a vehicle";
+    if (!formData.sector) newErrors.sector = "Select a sector";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const { mutate, isPending } = useMutation({
-    mutationFn: (data) => axiosClient.post("/api/v1/couriers", data),
+    mutationFn: (data) => {
+      const form = new FormData();
+
+      form.append("fullName", data.fullName);
+      form.append("phone", data.phone);
+      form.append("email", data.email);
+      form.append("vehicle", data.vehicle);
+      form.append("sector", data.sector);
+
+      if (profileImage) {
+        form.append("profileImage", profileImage);
+      }
+
+      return axiosClient.post("/api/v1/couriers", form, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+    },
 
     onSuccess: (res) => {
       const courier = res?.data?.data ?? res?.data;
-
-      if (!courier?._id) {
-        toast.error("Invalid server response");
-        return;
-      }
 
       toast.success("Courier registered successfully");
 
@@ -77,6 +80,8 @@ export default function AddCourier() {
         vehicle: "",
         sector: "",
       });
+
+      setProfileImage(null);
     },
 
     onError: (err) => {
@@ -89,6 +94,12 @@ export default function AddCourier() {
 
     if (!validateForm()) return;
 
+    // optional file size check
+    if (profileImage && profileImage.size > 5 * 1024 * 1024) {
+      toast.error("Image must be less than 5MB");
+      return;
+    }
+
     mutate(formData);
   };
 
@@ -100,13 +111,11 @@ export default function AddCourier() {
       [name]: value,
     }));
 
-    // remove error when typing
     setErrors((prev) => ({
       ...prev,
       [name]: "",
     }));
   };
-
   return (
     <div className="bg-[#f8fcf9] text-[#002020] min-h-screen flex flex-col overflow-x-hidden">
       <div className="flex flex-1">
@@ -141,11 +150,11 @@ export default function AddCourier() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
             {/* <!-- Profile Section (Left Column) --> */}
             <div className="lg:col-span-4 space-y-8">
-              {/* <div className="bg-[#d7fafa] rounded-xl p-8 relative overflow-hidden group">
+              <div className="bg-[#d7fafa] rounded-xl p-8 relative overflow-hidden group">
                 <div className="absolute inset-0 bg-gradient-to-br from-[#006d36]/5 to-transparent pointer-events-none"></div>
                 <div className="relative z-10 flex flex-col items-center">
                   <div className="w-48 h-48 rounded-full bg-[#ffffff] border-4 border-white shadow-xl flex items-center justify-center overflow-hidden mb-6 group-hover:scale-[1.02] transition-transform duration-500">
-                    <div className="flex flex-col items-center text-slate-300">
+                    {/* <div className="flex flex-col items-center text-slate-300">
                       <span
                         className="material-symbols-outlined text-6xl"
                         data-icon="add_a_photo"
@@ -155,24 +164,43 @@ export default function AddCourier() {
                       <span className="text-[0.6rem] font-black uppercase tracking-widest mt-2">
                         Upload Photo
                       </span>
-                    </div>
-                    <img
-                      alt=""
-                      className="hidden object-cover w-full h-full"
-                      src="https://lh3.googleusercontent.com/aida-public/AB6AXuAM3cM3bwzrO2eO98QLrdqVmn61JyUfGx8vmAibk_1GZ6YLy4yG45M56USn-vPnryAWm9O-qdZCMEczuRFvNmjchs-nBlMnVtWQUuG5OFiOXvetvrlQja7J3D2yYwhB05UGoHjp1gsZdmoKMLUV8RMxc_vmUmb0fKYsQLXWShZLvTKE1GJE6sDSywAf3XE7X0lyOoIsVFQAKmv6u5rW2iih59FvC-3M-yYEi_Way8t3Ei_Nd7ePGnkiQB8V0ArD4qXXwW41AVPfSvHS"
-                    />
+                    </div> */}
+
+                    {profileImage ? (
+                      <img
+                        src={URL.createObjectURL(profileImage)}
+                        alt="Profile Preview"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="flex flex-col items-center text-slate-300">
+                        <span className="material-symbols-outlined text-6xl">
+                          add_a_photo
+                        </span>
+                        <span className="text-[0.6rem] font-black uppercase tracking-widest mt-2">
+                          Upload Photo
+                        </span>
+                      </div>
+                    )}
                   </div>
+
+                  {/* HIDDEN INPUT */}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    id="profile Upload"
+                    className="font-bold text-[#001736] text-center border-2 bg-[#c6e9e9] hover:bg-[#54c4a8] p-1 rounded-full w-60 h-9"
+                    onChange={(e) => setProfileImage(e.target.files[0])}
+                  />
                   <h3 className="font-bold text-[#001736] text-center">
                     Profile Image
                   </h3>
                   <p className="text-xs text-slate-500 text-center mt-1 px-4">
                     Upload a clear front-facing portrait (JPG or PNG, max 5MB)
                   </p>
-                  <button className="mt-6 px-6 py-2 bg-[#c6e9e9] text-[#001736] font-bold text-xs uppercase tracking-widest rounded-full hover:bg-[#006d36] hover:text-white transition-all">
-                    Select File
-                  </button>
                 </div>
-              </div> */}
+              </div>
+
               <div className="bg-[#001736]  p-8 rounded-xl text-white relative overflow-hidden">
                 <div className="absolute -right-8 -top-8 text-white/5 pointer-events-none">
                   <span
@@ -319,8 +347,8 @@ export default function AddCourier() {
                         className="sr-only peer"
                         name="vehicle"
                         type="radio"
-                        value="Van"
-                        checked={formData.vehicle === "Van"}
+                        value="Transit Van"
+                        checked={formData.vehicle === "Transit Van"}
                         onChange={handleInputChange}
                       />
                       <div className="p-6 bg-[#e7e9e7] rounded-xl flex flex-col items-center text-center gap-3 border-2 border-transparent peer-checked:border-[#006d36] peer-checked:bg-[#006d36]/5 transition-all hover:bg-[#d2f5f4] h-full">
