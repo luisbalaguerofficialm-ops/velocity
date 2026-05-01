@@ -29,7 +29,7 @@ export default function SelectCourier() {
         params: {
           search,
           page,
-          limit: 5,
+          limit: 6,
         },
       });
       return res.data;
