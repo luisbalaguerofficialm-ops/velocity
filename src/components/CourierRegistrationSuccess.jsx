@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate, Link, useLocation, useParams } from "react-router-dom";
 import axiosClient from "../utils/axiosClient";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 
 export default function CourierRegistrationSuccess() {

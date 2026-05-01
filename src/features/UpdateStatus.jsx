@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import axiosClient from "../utils/axiosClient";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 import React, { useState } from "react";
 import { getShipmentStatusStyle } from "../utils/getShipmentStatusStyle";
 

@@ -28,6 +28,7 @@
     "react-pin-field": "^4.0.2",
     "react-router": "^7.13.1",
     "react-router-dom": "^7.13.1",
+    "react-toastify": "^11.1.0",
     "socket.io-client": "^4.8.3",
     "sonner": "^2.0.7",
     "swiper": "^12.1.2",

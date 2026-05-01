@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
 import axiosClient from "../utils/axiosClient";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 
 export default function CreateShipment() {
   const navigate = useNavigate();

@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import axiosClient from "../utils/axiosClient";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 
 import ShipmentMap from "../components/ShipmentMap";
 import socket, { connectSocket } from "../utils/Socket";

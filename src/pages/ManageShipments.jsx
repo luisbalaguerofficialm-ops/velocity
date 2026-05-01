@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import axiosClient from "../utils/axiosClient";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 import {
   Trash2,
