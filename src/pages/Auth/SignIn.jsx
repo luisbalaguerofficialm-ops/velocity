@@ -4,6 +4,7 @@ import axiosClient from "../../utils/axiosClient";
 import { toast } from "sonner";
 import { MdVisibilityOff, MdVisibility } from "react-icons/md";
 import google from "../../assets/goolge.png";
+import { useMutation } from "@tanstack/react-query";
 
 export default function SignIn() {
   const navigate = useNavigate();
@@ -14,9 +15,34 @@ export default function SignIn() {
   });
 
   const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
-
   const { email, password } = formData;
+
+  const loginMutation = useMutation({
+    mutationFn: async ({ email, password }) => {
+      const res = await axiosClient.post("/api/v1/admin/login", {
+        email,
+        password,
+      });
+      return res.data.data;
+    },
+
+    onSuccess: (data) => {
+      const { accessToken, admin } = data;
+
+      localStorage.setItem("accessToken", accessToken);
+
+      toast.success(`Welcome back, ${admin.name}`);
+
+      setTimeout(() => {
+        navigate("/admin");
+      }, 300);
+    },
+
+    onError: (error) => {
+      const msg = error?.response?.data?.message || "Login failed. Try again.";
+      toast.error(msg);
+    },
+  });
 
   const handleChange = (e) => {
     setFormData((prev) => ({
@@ -28,10 +54,11 @@ export default function SignIn() {
   /* =========================
      SUBMIT HANDLER (NO REACT QUERY)
   ========================= */
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
 
-    // ✅ Validation
+    if (loginMutation.isPending) return;
+
     if (!email || !password) {
       return toast.error("Please fill in all fields");
     }
@@ -44,29 +71,7 @@ export default function SignIn() {
       return toast.error("Password must be at least 6 characters");
     }
 
-    try {
-      setLoading(true);
-
-      const res = await axiosClient.post("/api/v1/admin/login", {
-        email,
-        password,
-      });
-
-      const { accessToken, admin } = res.data.data;
-
-      // ✅ Store token
-      localStorage.setItem("accessToken", accessToken);
-
-      toast.success(`Welcome back, ${admin.name}`);
-
-      // ✅ Redirect
-      navigate("/admin");
-    } catch (error) {
-      const msg = error?.response?.data?.message || "Login failed. Try again.";
-      toast.error(msg);
-    } finally {
-      setLoading(false);
-    }
+    loginMutation.mutate({ email, password });
   };
 
   return (
@@ -190,10 +195,38 @@ export default function SignIn() {
               <div className="space-y-4 pt-4">
                 <button
                   type="submit"
-                  disabled={loading}
-                  className="w-full py-3 bg-[#006d36] text-white font-bold rounded-xl hover:bg-[#005227] disabled:opacity-60"
+                  disabled={loginMutation.isPending}
+                  className={`w-full py-3 font-bold rounded-xl transition-all
+    ${
+      loginMutation.isPending
+        ? "bg-[#006d36]/60 cursor-not-allowed"
+        : "bg-[#006d36] hover:bg-[#005227]"
+    }
+  `}
                 >
-                  {loading ? "Signing in..." : "Sign In"}
+                  {loginMutation.isPending ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <svg className="w-5 h-5 animate-spin" viewBox="0 0 24 24">
+                        <circle
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="white"
+                          strokeWidth="4"
+                          fill="none"
+                          className="opacity-25"
+                        />
+                        <path
+                          fill="white"
+                          className="opacity-75"
+                          d="M4 12a8 8 0 018-8v8H4z"
+                        />
+                      </svg>
+                      Signing in...
+                    </span>
+                  ) : (
+                    "Sign In"
+                  )}
                 </button>
                 <div className="relative py-4">
                   <div className="absolute inset-0 flex items-center">
