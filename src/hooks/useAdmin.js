@@ -8,19 +8,16 @@ export default function useAdmin(options = {}) {
     queryFn: async () => {
       try {
         const res = await axiosClient.get("/api/v1/admin/me");
-        return res.data.data;
+        return res?.data?.data || null;
       } catch (error) {
-        // ✅ prevent React Query from crashing app
-        return null;
+        return null; // ✅ safe fallback
       }
     },
 
     staleTime: 1000 * 60 * 5,
+    retry: false,
+    refetchOnWindowFocus: false,
 
-    retry: false, // ❗ prevent infinite retry loops
-
-    refetchOnWindowFocus: false, // ❗ avoid random re-fetch
-
-    ...options, // ✅ allow control (enabled, etc.)
+    ...options,
   });
 }

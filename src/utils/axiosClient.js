@@ -1,5 +1,5 @@
 import axios from "axios";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 import socket from "./Socket";
 
 const API_URL = "https://api.velocitytransit.xyz";
@@ -16,7 +16,11 @@ const axiosClient = axios.create({
 axiosClient.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("accessToken");
-    if (token) config.headers.Authorization = `Bearer ${token}`;
+
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+
     return config;
   },
   (error) => Promise.reject(error),
@@ -26,21 +30,20 @@ axiosClient.interceptors.request.use(
 axiosClient.interceptors.response.use(
   (response) => response,
   async (error) => {
-    const originalRequest = error.config;
+    const originalRequest = error?.config;
 
-    // ❌ Network / CORS error
     if (!error.response) {
       toast.error("Network error. Check backend or CORS.");
       return Promise.reject(error);
     }
 
-    const isAuthRoute = window.location.pathname.includes("/signin");
+    const isAuthRoute = window.location.pathname === "/signin";
 
-    // ================= REFRESH TOKEN =================
     if (
       error.response.status === 401 &&
+      originalRequest &&
       !originalRequest._retry &&
-      !originalRequest.url.includes("refresh-token")
+      !originalRequest.url?.includes("refresh-token")
     ) {
       originalRequest._retry = true;
 
@@ -55,7 +58,6 @@ axiosClient.interceptors.response.use(
 
         localStorage.setItem("accessToken", accessToken);
 
-        // 🔌 Sync socket
         socket.auth = { token: accessToken };
         if (socket.connected) {
           socket.disconnect();
@@ -65,9 +67,9 @@ axiosClient.interceptors.response.use(
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;
         return axiosClient(originalRequest);
       } catch (refreshError) {
-        // ❗ ONLY redirect if NOT already on signin
         if (!isAuthRoute) {
           toast.error("Session expired. Please login again.");
+
           localStorage.removeItem("accessToken");
 
           if (socket.connected) socket.disconnect();
@@ -79,7 +81,6 @@ axiosClient.interceptors.response.use(
       }
     }
 
-    // ❗ Prevent toast spam on auth routes
     if (!isAuthRoute && error.response?.data?.message) {
       toast.error(error.response.data.message);
     }
@@ -98,4 +99,5 @@ export const logout = () => {
     window.location.href = "/signin";
   }
 };
-s
+
+export default axiosClient;
