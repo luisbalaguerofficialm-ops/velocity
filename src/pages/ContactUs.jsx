@@ -51,14 +51,14 @@ export default function ContactUs() {
 
   return (
     <div className="bg-[#e2fffe] text-[#002020] min-h-screen flex flex-col">
-      <main className="flex-grow">
+      <main className="flex-grow pt-20">
         {/* <!-- Hero Section --> */}
-        <section className="px-8 py-20 max-w-screen-2xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-end">
+        <section className="px-7 py-20 max-w-screen-2xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-end">
           <div className="lg:col-span-8">
             <span className="label-sm uppercase tracking-[0.2em] text-[#006d36] font-bold mb-4 block">
               Connect with Velocity
             </span>
-            <h1 className="text-6xl md:text-8xl font-extrabold tracking-tighter text-[#001736] leading-[0.9] mb-8">
+            <h1 className="text-5xl md:text-8xl font-extrabold tracking-tighter text-[#001736] leading-[0.9] mb-8">
               Precision <br />
               Communication.
             </h1>
@@ -88,7 +88,7 @@ export default function ContactUs() {
           </div>
         </section>
         {/* <!-- Main Content: Form & Logistics Info --> */}
-        <section className="px-8 py-12 max-w-screen-2xl mx-auto">
+        <section className="px-6 py-12 max-w-screen-2xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
             {/* <!-- Contact Form Section --> */}
             <div className="bg-[#d7fafa] p-10 rounded-xl relative overflow-hidden">

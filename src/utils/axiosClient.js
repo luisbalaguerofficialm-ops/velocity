@@ -2,7 +2,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import socket from "./Socket";
 
-const API_URL = "https://flyexpress-backend.onrender.com";
+const API_URL = "https://api.velocitytransit.xyz";
 
 const axiosClient = axios.create({
   baseURL: API_URL,
@@ -45,7 +45,7 @@ axiosClient.interceptors.response.use(
         const refreshRes = await axios.post(
           `${API_URL}/api/v1/admin/refresh-token`,
           {},
-          { withCredentials: true }, 
+          { withCredentials: true },
         );
 
         const { accessToken } = refreshRes.data.data;
@@ -68,7 +68,7 @@ axiosClient.interceptors.response.use(
 
         if (socket.connected) socket.disconnect();
 
-        window.location.href = "/signin"; 
+        window.location.href = "/signin";
 
         return Promise.reject(refreshError);
       }

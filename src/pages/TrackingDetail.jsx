@@ -70,7 +70,7 @@ export default function TrackingDetail() {
 
   return (
     <div className="bg-[#e2fffe] text-[#002020] min-h-screen flex flex-col">
-      <main className=" mx-auto px-20 py-36 space-y-24">
+      <main className=" mx-auto px-7 py-36 space-y-24">
         {/* <!-- High-Impact Header Section --> */}
         <section className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div className="space-y-2">
@@ -237,7 +237,9 @@ export default function TrackingDetail() {
                     Dimensions
                   </p>
                   <p className="text-xl font-extrabold text-[#001736]">
-                    {data.package.dimensions}
+                    {data.package.dimensions.length} ×{" "}
+                    {data.package.dimensions.width} ×{" "}
+                    {data.package.dimensions.height} cm
                   </p>
                 </div>
                 <div className="space-y-1">
@@ -356,62 +358,66 @@ export default function TrackingDetail() {
                       className={`relative p-6 rounded-2xl transition-all duration-300
           
           ${isCompleted && "bg-white border-b-4 border-[#006d36]"}
-          ${isActive && "bg-[#001736] text-white shadow-xl scale-105 z-10"}
+          ${isActive && "bg-[#001736] text-white shadow-xl scale-105 z-10 ring-2 ring-[#83fba5]"}
           ${!isCompleted && !isActive && "bg-[#d7fafa] opacity-50"}
           
           hover:scale-[1.02]`}
                     >
-                      {/* ICON + TIME */}
-                      <div className="flex justify-between items-start mb-4">
-                        <span
-                          className={`material-symbols-outlined
-                ${isCompleted ? "text-[#006d36]" : ""}
-                ${isActive ? "text-[#83fba5]" : ""}
-                ${!isCompleted && !isActive ? "text-[#001736]/30" : ""}
-              `}
-                          style={{
-                            fontVariationSettings: isCompleted
-                              ? "'FILL' 1"
-                              : "'FILL' 0",
-                          }}
-                        >
-                          {step.key === "pickup" && "check_circle"}
-                          {step.key === "in_transit" && "flight_takeoff"}
-                          {step.key === "out_for_delivery" && "local_shipping"}
-                          {step.key === "delivered" && "done_all"}
-                        </span>
+                      {/* ✅ INNER WRAPPER (handles animation safely) */}
+                      <div className={isActive ? "animate-active-shake" : ""}>
+                        {/* ICON + TIME */}
+                        <div className="flex justify-between items-start mb-4">
+                          <span
+                            className={`material-symbols-outlined
+                  ${isCompleted ? "text-[#006d36]" : ""}
+                  ${isActive ? "text-[#83fba5]" : ""}
+                  ${!isCompleted && !isActive ? "text-[#001736]/30" : ""}
+                `}
+                            style={{
+                              fontVariationSettings: isCompleted
+                                ? "'FILL' 1"
+                                : "'FILL' 0",
+                            }}
+                          >
+                            {step.key === "pickup" && "check_circle"}
+                            {step.key === "in_transit" && "flight_takeoff"}
+                            {step.key === "out_for_delivery" &&
+                              "local_shipping"}
+                            {step.key === "delivered" && "done_all"}
+                          </span>
 
-                        <span
-                          className={`text-[10px] font-bold
-                ${isActive ? "opacity-60" : "text-[#43474f]/40"}
+                          <span
+                            className={`text-[10px] font-bold
+                  ${isActive ? "opacity-60" : "text-[#43474f]/40"}
+                `}
+                          >
+                            {step.time
+                              ? new Date(step.time).toLocaleTimeString([], {
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                })
+                              : "—"}
+                          </span>
+                        </div>
+
+                        {/* LABEL */}
+                        <p
+                          className={`text-sm font-black uppercase tracking-tight
+                ${isActive ? "text-white" : "text-[#001736]"}
               `}
                         >
-                          {step.time
-                            ? new Date(step.time).toLocaleTimeString([], {
-                                hour: "2-digit",
-                                minute: "2-digit",
-                              })
-                            : "—"}
-                        </span>
+                          {step.label}
+                        </p>
+
+                        {/* LOCATION */}
+                        <p
+                          className={`text-xs mt-1
+                ${isActive ? "opacity-80" : "text-[#43474f]"}
+              `}
+                        >
+                          {step.location || "—"}
+                        </p>
                       </div>
-
-                      {/* LABEL */}
-                      <p
-                        className={`text-sm font-black uppercase tracking-tight
-              ${isActive ? "text-white" : "text-[#001736]"}
-            `}
-                      >
-                        {step.label}
-                      </p>
-
-                      {/* LOCATION */}
-                      <p
-                        className={`text-xs mt-1
-              ${isActive ? "opacity-80" : "text-[#43474f]"}
-            `}
-                      >
-                        {step.location || "—"}
-                      </p>
                     </div>
                   );
                 })}

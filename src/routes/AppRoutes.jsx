@@ -87,7 +87,7 @@ export default function AppRoutes() {
         { path: "services", element: <Services /> },
         { path: "global-network", element: <GlobalNetwork /> },
         { path: "onboarding", element: <Onboarding /> },
-        { path: "tracking-detail", element: <TrackingDetail /> },
+        { path: "tracking-detail/:trackingId", element: <TrackingDetail /> },
         { path: "tracking", element: <Tracking /> },
         { path: "about-us", element: <AboutUs /> },
         { path: "contact-us", element: <ContactUs /> },

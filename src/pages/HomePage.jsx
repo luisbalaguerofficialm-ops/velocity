@@ -1,19 +1,39 @@
 import React, { useState } from "react";
 import { ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router";
+import { useMutation } from "@tanstack/react-query";
+import axiosClient from "../utils/axiosClient";
+import { toast } from "sonner";
 
 export default function HomePage() {
   const navigate = useNavigate();
   const [trackingId, setTrackingId] = useState("");
 
+  const { mutate, isPending } = useMutation({
+    mutationFn: async (trackingId) => {
+      const res = await axiosClient.get(
+        `/api/v1/shipments/track/${trackingId}`,
+      );
+      return res.data;
+    },
+
+    onSuccess: (data, trackingId) => {
+      // ✅ only navigate after success
+      navigate(`/tracking-detail/${trackingId}`);
+    },
+
+    onError: (error) => {
+      toast.error(error?.response?.data?.message || "Tracking failed");
+    },
+  });
+
   const handleTrackShipment = () => {
     if (!trackingId.trim()) {
-      alert("Please enter a tracking number");
+      toast.error("Please enter a tracking number");
       return;
     }
 
-    // navigate with dynamic param
-    navigate(`/tracking-detail/${trackingId}`);
+    mutate(trackingId);
   };
   return (
     <div className="pt-20">
@@ -56,9 +76,18 @@ export default function HomePage() {
               </div>
               <button
                 onClick={handleTrackShipment}
-                className="bg-[#006d3e] text-on-secondary px-10 py-4 rounded-lg font-bold font-headline hover:bg-emerald-700 transition-colors uppercase tracking-wider"
+                disabled={isPending}
+                className={`bg-[#006d3e] text-on-secondary px-10 py-4 rounded-lg font-bold font-headline uppercase tracking-wider transition-all flex items-center justify-center gap-2
+  ${isPending ? "opacity-70 cursor-not-allowed" : "hover:bg-emerald-700"}`}
               >
-                Track Shipment
+                {isPending ? (
+                  <>
+                    <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                    Tracking...
+                  </>
+                ) : (
+                  "Track Shipment"
+                )}
               </button>
             </div>
           </div>

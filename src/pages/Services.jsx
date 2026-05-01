@@ -3,7 +3,7 @@ import React from "react";
 export default function Services() {
   return (
     <div className="bg-[#e2fffe] text-[#002020] font-body selection:bg-[#83fba5] selection:text-[#00743a]">
-      <main className="mim-h-screen mx-auto px-18 py-50 space-y-24">
+      <main className="mim-h-screen mx-auto py-50 space-y-24">
         {/* <!-- Hero Section --> */}
         <section className="px-8 max-w-7xl mx-auto mb-24">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-end">
@@ -258,9 +258,6 @@ export default function Services() {
             </p>
           </div>
           <div>
-            <h4 className="text-[#e2fffe] font-bold mb-6 text-xs uppercase tracking-[0.2em]">
-              Services
-            </h4>
             <div className="flex flex-col space-y-4">
               <a
                 className="font-manrope text-sm font-light tracking-wide text-[#c6e9e9]/60 hover:text-[#83fba5] transition-all duration-200"
@@ -328,9 +325,6 @@ export default function Services() {
           </div>
         </div>
         <div className="px-12 py-8 border-t border-[#002b5b] flex justify-between items-center">
-          <div className="font-manrope text-sm font-light tracking-wide text-[#c6e9e9]/60">
-            © 2026 Kinetic Precision Logistics. All rights reserved.
-          </div>
           <div className="flex gap-6">
             <span
               className="material-symbols-outlined text-[#c6e9e9]/60 hover:text-[#83fba5] cursor-pointer"

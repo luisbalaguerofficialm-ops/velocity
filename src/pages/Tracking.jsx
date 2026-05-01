@@ -1,16 +1,44 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
+import { useNavigate } from "react-router";
+import { useMutation } from "@tanstack/react-query";
+import axiosClient from "../utils/axiosClient";
+import { toast } from "sonner";
+import { useState } from "react";
 
 export default function Tracking() {
   const navigate = useNavigate();
+  const [trackingId, setTrackingId] = useState("");
+
+  const { mutate, isPending } = useMutation({
+    mutationFn: async (trackingId) => {
+      const res = await axiosClient.get(
+        `/api/v1/shipments/track/${trackingId}`,
+      );
+      return res.data;
+    },
+
+    onSuccess: (data, trackingId) => {
+      // ✅ only navigate after success
+      navigate(`/tracking-detail/${trackingId}`);
+    },
+
+    onError: (error) => {
+      toast.error(error?.response?.data?.message || "Tracking failed");
+    },
+  });
 
   const handleTrackShipment = () => {
-    navigate("/tracking-detail");
-  };
+    if (!trackingId.trim()) {
+      toast.error("Please enter a tracking number");
+      return;
+    }
 
+    mutate(trackingId);
+  };
   return (
     <div className="bg-[#e2fffe] font-body text-[#002020] antialiased overflow-x-hidden">
-      <main className="mim-h-screen mx-auto px-20 py-50 space-y-24">
+      <main className="mim-h-screen mx-auto px-5 py-50 space-y-24">
         {/* <!-- Hero Tracking Search --> */}
         <section className="relative">
           <div className="flex flex-col md:flex-row gap-12 items-end">
@@ -27,21 +55,32 @@ export default function Tracking() {
                     search
                   </span>
                   <input
-                    className="w-full bg-transparent border-none focus:ring-0 py-4 text-lg font-medium text-[#001736] placeholder:text-[#747780]/50"
-                    placeholder="Enter Tracking ID (e.g., VEL-TX-99021)"
+                    value={trackingId}
+                    onChange={(e) => setTrackingId(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") handleTrackShipment();
+                    }}
+                    className="bg-transparent border-none focus:ring-0 w-full font-body py-4 px-3 text-on-surface"
+                    placeholder="Enter Tracking Number"
                     type="text"
                   />
                   <button
                     onClick={handleTrackShipment}
-                    className="kinetic-gradient text-[#ffffff] px-10 py-4 rounded-lg font-bold hover:opacity-90 transition-all flex items-center gap-2"
+                    disabled={isPending}
+                    className={`bg-[#006d3e] text-on-secondary px-10 py-4 rounded-lg font-bold font-headline uppercase tracking-wider transition-all flex items-center justify-center gap-2
+  ${isPending ? "opacity-70 cursor-not-allowed" : "hover:bg-emerald-700"}`}
                   >
-                    Track Parcel
-                    <span className="material-symbols-outlined">
-                      arrow_forward
-                    </span>
+                    {isPending ? (
+                      <>
+                        <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                        Tracking...
+                      </>
+                    ) : (
+                      "Track Shipment"
+                    )}
                   </button>
                 </div>
-                <div className="absolute -bottom-1 left-0 w-full h-1 bg-[#006d36] scale-x-0 group-focus-within:scale-x-100 transition-transform origin-left"></div>
+                <div className="absolute -bottom-1 left-0 w-full h-1 bg-[#001736] scale-x-0 group-focus-within:scale-x-100 transition-transform origin-left"></div>
               </div>
             </div>
             <div className="w-full md:w-1/3 text-right hidden md:block">
@@ -54,7 +93,7 @@ export default function Tracking() {
         </section>
         {/* <!-- Real-time Status Dashboard --> */}
         <section className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          <div className="lg:col-span-8 bg-[#d2f5f4] rounded-3xl p-10 relative overflow-hidden">
+          <div className="lg:col-span-7 bg-[#d2f5f4] rounded-3xl p-13 relative overflow-hidden">
             <div className="absolute top-0 right-0 p-8">
               <span className="bg-[#83fba5] text-[#00743a] px-4 py-2 rounded-full text-xs font-bold flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-[#006d36] animate-pulse"></span>
