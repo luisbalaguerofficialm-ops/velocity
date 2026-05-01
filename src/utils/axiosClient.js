@@ -28,12 +28,15 @@ axiosClient.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    // 🔥 Handle network/CORS errors
+    // ❌ Network / CORS error
     if (!error.response) {
       toast.error("Network error. Check backend or CORS.");
       return Promise.reject(error);
     }
 
+    const isAuthRoute = window.location.pathname.includes("/signin");
+
+    // ================= REFRESH TOKEN =================
     if (
       error.response.status === 401 &&
       !originalRequest._retry &&
@@ -62,19 +65,22 @@ axiosClient.interceptors.response.use(
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;
         return axiosClient(originalRequest);
       } catch (refreshError) {
-        toast.error("Session expired. Please login again.");
+        // ❗ ONLY redirect if NOT already on signin
+        if (!isAuthRoute) {
+          toast.error("Session expired. Please login again.");
+          localStorage.removeItem("accessToken");
 
-        localStorage.removeItem("accessToken");
+          if (socket.connected) socket.disconnect();
 
-        if (socket.connected) socket.disconnect();
-
-        window.location.href = "/signin";
+          window.location.href = "/signin";
+        }
 
         return Promise.reject(refreshError);
       }
     }
 
-    if (error.response?.data?.message) {
+    // ❗ Prevent toast spam on auth routes
+    if (!isAuthRoute && error.response?.data?.message) {
       toast.error(error.response.data.message);
     }
 
@@ -85,8 +91,11 @@ axiosClient.interceptors.response.use(
 // ================= LOGOUT =================
 export const logout = () => {
   localStorage.removeItem("accessToken");
-  if (socket.connected) socket.disconnect();
-  window.location.href = "/signin"; // ✅ FIXED
-};
 
-export default axiosClient;
+  if (socket.connected) socket.disconnect();
+
+  if (window.location.pathname !== "/signin") {
+    window.location.href = "/signin";
+  }
+};
+s
