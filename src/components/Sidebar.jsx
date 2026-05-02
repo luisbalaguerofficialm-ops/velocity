@@ -9,10 +9,13 @@ import {
   Truck,
   Plus,
 } from "lucide-react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import Logo from "./Logo";
+import { toast } from "sonner";
 
 export default function Sidebar({ mobileOpen, setMobileOpen }) {
+  const navigate = useNavigate();
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [openSection, setOpenSection] = useState(null);
   const location = useLocation();
 
@@ -23,29 +26,35 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
     setOpenSection(openSection === section ? null : section);
 
   const handleLogout = async () => {
-    const token = localStorage.getItem("adminToken");
+    const token = localStorage.getItem("accessToken");
 
     try {
-      const res = await fetch("", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await fetch(
+        "https://api.velocitytransit.xyz/api/v1/admin/logout",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          credentials: "include",
+        },
+      );
 
       const data = await res.json();
 
       if (data.success) {
-        // Clear localStorage
-        localStorage.removeItem("adminToken");
+        localStorage.removeItem("accessToken");
         localStorage.removeItem("user");
 
-        // Redirect to login
-        window.location.href = "/login";
+        toast.success("Logged out successfully");
+
+        navigate("/signIn");
       } else {
-        alert(data.message || "Logout failed");
+        toast.error(data.message || "Logout failed");
       }
     } catch (err) {
       console.error("Logout error:", err);
-      alert("Server error during logout");
+      toast.error("Server error during logout");
     }
   };
 
@@ -133,7 +142,7 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
 
         <div className="mt-auto pt-6">
           <button
-            onClick={handleLogout}
+            onClick={() => setShowLogoutModal(true)}
             className="flex items-center w-full px-3 py-2 text-red-600 rounded-lg hover:bg-red-50"
           >
             <LogOut className="w-4 h-4 mr-3" />
@@ -141,6 +150,39 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
           </button>
         </div>
       </aside>
+      {/* =========================
+        🔐 LOGOUT MODAL (FIXED)
+    ========================= */}
+      {showLogoutModal && (
+        <div className="fixed inset-0 bg-[#e2fffe] flex items-center justify-center z-[999]">
+          <div className="bg-white rounded-xl p-6 w-[90%] max-w-sm shadow-lg">
+            <h2 className="text-lg font-bold text-[#001b3d]">Confirm Logout</h2>
+
+            <p className="text-sm text-gray-600 mt-2">
+              Are you sure you want to logout?
+            </p>
+
+            <div className="flex justify-end gap-3 mt-6">
+              <button
+                onClick={() => setShowLogoutModal(false)}
+                className="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300"
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={async () => {
+                  setShowLogoutModal(false);
+                  await handleLogout();
+                }}
+                className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700"
+              >
+                Yes, Logout
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

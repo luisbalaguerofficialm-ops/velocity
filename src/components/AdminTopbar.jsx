@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import axiosClient from "../utils/axiosClient";
+import { toast } from "sonner";
 
 export default function AdminTopbar() {
   const navigate = useNavigate();
@@ -10,6 +11,7 @@ export default function AdminTopbar() {
   const [search, setSearch] = useState("");
   const [showNotif, setShowNotif] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const notifRef = useRef();
   const profileRef = useRef();
@@ -18,9 +20,15 @@ export default function AdminTopbar() {
   const { data: admin } = useQuery({
     queryKey: ["me"],
     queryFn: async () => {
-      const res = await axiosClient.get("/api/v1/admin/me");
-      return res.data.data;
+      try {
+        const res = await axiosClient.get("/api/v1/admin/me");
+        return res.data.data;
+      } catch (err) {
+        return null;
+      }
     },
+    retry: false,
+    refetchOnWindowFocus: false,
   });
 
   /* ================= FETCH NOTIFICATIONS ================= */
@@ -45,9 +53,23 @@ export default function AdminTopbar() {
 
   /* ================= LOGOUT ================= */
   const handleLogout = async () => {
-    await axiosClient.post("/api/v1/admin/logout");
-    localStorage.removeItem("accessToken");
-    navigate("/login");
+    try {
+      const res = await axiosClient.post("/api/v1/admin/logout");
+
+      if (res.data.success) {
+        localStorage.removeItem("accessToken");
+
+        toast.success("Logged out successfully");
+
+        queryClient.clear();
+
+        navigate("/", { replace: true });
+      } else {
+        toast.error(res.data.message || "Logout failed");
+      }
+    } catch (err) {
+      toast.error("Server error during logout");
+    }
   };
 
   /* ================= CLOSE DROPDOWNS ================= */
@@ -170,7 +192,10 @@ export default function AdminTopbar() {
               </button>
 
               <button
-                onClick={handleLogout}
+                onClick={() => {
+                  setShowProfile(false); // 👈 close dropdown first
+                  setShowLogoutModal(true);
+                }}
                 className="block w-full text-left px-3 py-2 text-sm text-red-500 hover:bg-gray-50 rounded"
               >
                 Logout
@@ -179,6 +204,39 @@ export default function AdminTopbar() {
           )}
         </div>
       </div>
+      {showLogoutModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#e2fffe] backdrop-blur-sm">
+          <div className="bg-white w-[90%] max-w-sm rounded-2xl shadow-xl p-6 animate-in fade-in zoom-in">
+            <h2 className="text-lg font-bold text-[#001b3d]">Confirm Logout</h2>
+
+            <p className="text-sm text-gray-500 mt-2">
+              Are you sure you want to logout? You will need to sign in again to
+              access your account.
+            </p>
+
+            <div className="flex justify-end gap-3 mt-6">
+              {/* Cancel */}
+              <button
+                onClick={() => setShowLogoutModal(false)}
+                className="px-4 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 text-sm"
+              >
+                Cancel
+              </button>
+
+              {/* Confirm */}
+              <button
+                onClick={async () => {
+                  setShowLogoutModal(false);
+                  await handleLogout();
+                }}
+                className="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white text-sm"
+              >
+                Yes, Logout
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 }

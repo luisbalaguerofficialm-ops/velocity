@@ -254,7 +254,7 @@ export default function SignIn() {
                 Need an account?
               </p>
               <Link
-                to="/auth/signup"
+                to="/signup"
                 className="text-[#006d36] font-bold hover:underline"
                 href="#"
               >
