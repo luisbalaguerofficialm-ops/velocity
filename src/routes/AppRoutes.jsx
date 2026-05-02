@@ -2,6 +2,7 @@ import React, { lazy, Suspense } from "react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import SuspenseUi from "../components/SuspenseUi.jsx";
 import Message from "../pages/Message.jsx";
+import ProtectedRoute from "../routes/ProtectedRoutes.jsx";
 
 /* =========================
    📦 Layouts
@@ -76,107 +77,99 @@ export default function AppRoutes() {
        🌐 PUBLIC ROUTES
     ========================= */
     {
-      path: "/",
-      element: (
-        <Suspense fallback={<SuspenseUi />}>
-          <MainLayout />
-        </Suspense>
-      ),
+      element: <ProtectedRoute type="public" />,
       children: [
-        { index: true, element: <HomePage /> },
-        { path: "services", element: <Services /> },
-        { path: "global-network", element: <GlobalNetwork /> },
-        { path: "onboarding", element: <Onboarding /> },
-        { path: "tracking-detail/:trackingId", element: <TrackingDetail /> },
-        { path: "tracking", element: <Tracking /> },
-        { path: "about-us", element: <AboutUs /> },
-        { path: "contact-us", element: <ContactUs /> },
+        {
+          path: "/",
+          element: (
+            <Suspense fallback={<SuspenseUi />}>
+              <MainLayout />
+            </Suspense>
+          ),
+          children: [
+            { index: true, element: <HomePage /> },
+            { path: "services", element: <Services /> },
+            { path: "global-network", element: <GlobalNetwork /> },
+            { path: "onboarding", element: <Onboarding /> },
+            {
+              path: "tracking-detail/:trackingId",
+              element: <TrackingDetail />,
+            },
+            { path: "tracking", element: <Tracking /> },
+            { path: "about-us", element: <AboutUs /> },
+            { path: "contact-us", element: <ContactUs /> },
+          ],
+        },
       ],
     },
+
+    // =============================
+    // 🔐 AUTH ROUTES
+    // =============================
+
+    // =============================
+    // 🔐 AUTH ROUTES
+    // =============================
+    {
+      element: <ProtectedRoute type="guest" />,
+      children: [
+        { path: "/signIn", element: <SignIn /> },
+        { path: "/signup", element: <SignUp /> },
+        { path: "/verify", element: <VerifyAccount /> },
+        { path: "/reset-password", element: <ResetPassword /> },
+        { path: "/verification-success", element: <VerificationSuccess /> },
+      ],
+    }, 
 
     /* =========================
        🛠 ADMIN ROUTES (NO NAVBAR/FOOTER)
     ========================= */
     {
-      path: "/admin",
-      element: (
-        <Suspense fallback={<SuspenseUi />}>
-          <DashboardLayout />
-        </Suspense>
-      ),
+      element: <ProtectedRoute type="private" />,
       children: [
-        { index: true, element: <AdminDashboard /> },
-        { path: "dashboard", element: <AdminDashboard /> },
-        { path: "create-shipment", element: <CreateShipment /> },
-        { path: "edit-shipment/:id", element: <EditShipment /> },
         {
-          path: "shipment-successful",
-          element: <ShipmentCreatedSuccessfully />,
-        },
-        { path: "Update-Status-Success", element: <UpdateStatusSuccess /> },
-        {
-          path: "courier-success",
-          element: <CourierRegistrationSuccess />,
-        },
-        { path: "admin-profile", element: <AdminProfile /> },
-        { path: "shipment-detail/:id", element: <ShipmentDetail /> },
-        { path: "message", element: <Message /> },
-        { path: "update-status/:id", element: <UpdateStatus /> },
-        { path: "live-map/:id", element: <LiveMap /> },
-        { path: "manage-shipments", element: <ManageShipments /> },
-        { path: "select-courier", element: <SelectCourier /> },
-        { path: "shipment-list", element: <AllShipmentFeed /> },
-        { path: "courier-assigned", element: <CourierAssigned /> },
-        { path: "notifications", element: <Notifications /> },
-        { path: "add-courier", element: <AddCourier /> },
-        { path: "view-in-fleet", element: <ViewInFleet /> },
-        { path: "admin-courier-profile/:id", element: <AdminCourierProfile /> },
-        { path: "Notification-History", element: <NotificationHistory /> },
-      ],
-    },
+          path: "/admin",
+          element: (
+            <Suspense fallback={<SuspenseUi />}>
+              <DashboardLayout />
+            </Suspense>
+          ),
+          children: [
+            { index: true, element: <AdminDashboard /> },
+            { path: "dashboard", element: <AdminDashboard /> },
+            { path: "message", element: <Message /> },
 
-    /* =========================
-       🔐 AUTH / STANDALONE
-    ========================= */
-    {
-      path: "reset-password",
-      element: (
-        <Suspense fallback={<SuspenseUi />}>
-          <ResetPassword />
-        </Suspense>
-      ),
-    },
-    {
-      path: "auth/signup",
-      element: (
-        <Suspense fallback={<SuspenseUi />}>
-          <SignUp />
-        </Suspense>
-      ),
-    },
-    {
-      path: "verify",
-      element: (
-        <Suspense fallback={<SuspenseUi />}>
-          <VerifyAccount />
-        </Suspense>
-      ),
-    },
-    {
-      path: "signIn",
-      element: (
-        <Suspense fallback={<SuspenseUi />}>
-          <SignIn />
-        </Suspense>
-      ),
-    },
-    {
-      path: "verification-Success",
-      element: (
-        <Suspense fallback={<SuspenseUi />}>
-          <VerificationSuccess />
-        </Suspense>
-      ),
+            { path: "create-shipment", element: <CreateShipment /> },
+            { path: "edit-shipment/:id", element: <EditShipment /> },
+            {
+              path: "shipment-successful",
+              element: <ShipmentCreatedSuccessfully />,
+            },
+            { path: "Update-Status-Success", element: <UpdateStatusSuccess /> },
+            {
+              path: "courier-success",
+              element: <CourierRegistrationSuccess />,
+            },
+            { path: "admin-profile", element: <AdminProfile /> },
+            { path: "shipment-detail/:id", element: <ShipmentDetail /> },
+            { path: "message", element: <Message /> },
+            { path: "update-status/:id", element: <UpdateStatus /> },
+            { path: "live-map/:id", element: <LiveMap /> },
+            { path: "manage-shipments", element: <ManageShipments /> },
+            { path: "select-courier", element: <SelectCourier /> },
+            { path: "shipment-list", element: <AllShipmentFeed /> },
+            { path: "courier-assigned", element: <CourierAssigned /> },
+            { path: "notifications", element: <Notifications /> },
+            { path: "add-courier", element: <AddCourier /> },
+            { path: "view-in-fleet", element: <ViewInFleet /> },
+            {
+              path: "admin-courier-profile/:id",
+              element: <AdminCourierProfile />,
+            },
+            { path: "Notification-History", element: <NotificationHistory /> },
+          ],
+        },
+      ],
     },
   ];
 

@@ -37,13 +37,17 @@ axiosClient.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    const isAuthRoute = window.location.pathname === "/signin";
+    const isAuthRoute = window.location.pathname.includes("/signIn");
+
+    // IMPORTANT: ignore /me request completely
+    const isMeRequest = originalRequest?.url?.includes("/admin/me");
 
     if (
       error.response.status === 401 &&
       originalRequest &&
       !originalRequest._retry &&
-      !originalRequest.url?.includes("refresh-token")
+      !originalRequest.url?.includes("refresh-token") &&
+      !originalRequest.url?.includes("/admin/me")
     ) {
       originalRequest._retry = true;
 
@@ -67,22 +71,16 @@ axiosClient.interceptors.response.use(
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;
         return axiosClient(originalRequest);
       } catch (refreshError) {
-        if (!isAuthRoute) {
-          toast.error("Session expired. Please login again.");
-
+        if (!isAuthRoute && !isMeRequests) {
           localStorage.removeItem("accessToken");
 
           if (socket.connected) socket.disconnect();
 
-          window.location.href = "/signin";
+          window.location.href = "/signIn";
         }
 
         return Promise.reject(refreshError);
       }
-    }
-
-    if (!isAuthRoute && error.response?.data?.message) {
-      toast.error(error.response.data.message);
     }
 
     return Promise.reject(error);
