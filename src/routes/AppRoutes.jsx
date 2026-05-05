@@ -119,7 +119,7 @@ export default function AppRoutes() {
         { path: "/reset-password", element: <ResetPassword /> },
         { path: "/verification-success", element: <VerificationSuccess /> },
       ],
-    }, 
+    },
 
     /* =========================
        🛠 ADMIN ROUTES (NO NAVBAR/FOOTER)
@@ -152,7 +152,7 @@ export default function AppRoutes() {
             },
             { path: "admin-profile", element: <AdminProfile /> },
             { path: "shipment-detail/:id", element: <ShipmentDetail /> },
-            { path: "message", element: <Message /> },
+            { path: "message/:conversationId", element: <Message /> },
             { path: "update-status/:id", element: <UpdateStatus /> },
             { path: "live-map/:id", element: <LiveMap /> },
             { path: "manage-shipments", element: <ManageShipments /> },

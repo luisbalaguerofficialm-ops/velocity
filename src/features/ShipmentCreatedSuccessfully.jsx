@@ -11,12 +11,29 @@ import {
   Globe,
   User,
 } from "lucide-react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+
+import axiosClient from "../utils/axiosClient";
+import { toast } from "sonner";
 
 export default function ShipmentCreatedSuccessfully() {
   const navigate = useNavigate();
-  const { state } = useLocation();
-  const shipment = state?.shipment;
+  const { id } = useParams();
+
+  const { data: shipment, isLoading } = useQuery({
+    queryKey: ["shipment", id],
+    enabled: !!id,
+    queryFn: async () => {
+      const res = await axiosClient.get(`/api/v1/shipments/${id}`);
+      return res.data.data;
+    },
+  });
+  shipment?.courier;
+
+  if (isLoading) {
+    return <div className="p-10">Loading shipment...</div>;
+  }
 
   if (!shipment) {
     return (
@@ -43,8 +60,8 @@ export default function ShipmentCreatedSuccessfully() {
     });
   };
 
-  const handleCreateAnother = () => {
-    navigate("/admin/create-shipment");
+  const handleShipmentDetail = (shipment) => {
+    navigate(`/admin/shipment-detail/${shipment._id}`);
   };
 
   return (
@@ -70,17 +87,22 @@ export default function ShipmentCreatedSuccessfully() {
             <div className="flex flex-col gap-4 w-full">
               <button
                 onClick={handleAssignCourier}
-                className="w-full md:w-auto px-10 py-4 bg-gradient-to-br from-[#001736] to-[#002b5b] text-[#ffffff] font-bold rounded-xl shadow-2xl shadow-[#001736]/20 hover:scale-[0.98] transition-transform flex items-center justify-center gap-3"
+                disabled={!!shipment?.courier}
+                className={`w-full md:w-auto px-10 py-4 font-bold rounded-xl shadow-2xl flex items-center justify-center gap-3 transition-transform ${
+                  shipment?.courier
+                    ? "bg-gray-300 text-gray-600 cursor-not-allowed"
+                    : "bg-gradient-to-br from-[#001736] to-[#002b5b] text-white hover:scale-[0.98]"
+                }`}
               >
                 Assign Courier for this Shipment
                 <ArrowRight className="w-4 h-4" />
               </button>
               <button
-                onClick={handleCreateAnother}
-                className="w-full md:w-auto px-10 py-4 bg-[#c6e9e9] text-[#001736] font-bold rounded-xl hover:bg-[#c6e9e9] transition-colors flex items-center justify-center gap-3"
+                onClick={handleShipmentDetail}
+                className="w-full md:w-auto px-10 py-4 bg-[#c6e9e9] text-[#001736] font-bold rounded-xl hover:bg-[#bfe0e0] transition-colors flex items-center justify-center gap-3"
               >
                 <PlusSquare className="w-4 h-4" />
-                Create Another Shipment
+                View Shipment
               </button>
             </div>
           </div>
@@ -113,7 +135,9 @@ export default function ShipmentCreatedSuccessfully() {
                     </span>
                     <div className="flex items-center gap-2">
                       <MapPin className="w-4 h-4 text-[#006d36]" />
-                      <span className="font-bold text-[#001736]">{shipment.pickupAddress}</span>
+                      <span className="font-bold text-[#001736]">
+                        {shipment.pickupAddress}
+                      </span>
                     </div>
                   </div>
                   <div>
@@ -122,7 +146,9 @@ export default function ShipmentCreatedSuccessfully() {
                     </span>
                     <div className="flex items-center gap-2">
                       <Flag className="w-4 h-4 text-[#ba1a1a]" />
-                      <span className="font-bold text-[#001736]">{shipment.deliveryAddress}</span>
+                      <span className="font-bold text-[#001736]">
+                        {shipment.deliveryAddress}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -133,7 +159,7 @@ export default function ShipmentCreatedSuccessfully() {
                       Service Level
                     </span>
                     <div className="inline-flex px-3 py-1 bg-[#83fba5] text-[#00743a] rounded-full text-xs font-black tracking-wide">
-               {        shipment.serviceLevel}
+                      {shipment.serviceLevel}
                     </div>
                   </div>
                   <div>
@@ -141,7 +167,7 @@ export default function ShipmentCreatedSuccessfully() {
                       Total Cost
                     </span>
                     <span className="text-2xl font-black text-[#001736] tracking-tighter">
-                      ${shipment.cost.toFixed(2)}
+                      ${Number(shipment?.cost || 0).toFixed(2)}
                     </span>
                   </div>
                 </div>

@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import axiosClient from "../utils/axiosClient";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
+import { getStatusStyle } from "../utils/statusStyles";
 
 export default function SelectCourier() {
   const navigate = useNavigate();
@@ -14,7 +15,11 @@ export default function SelectCourier() {
   const { state } = useLocation();
   const shipmentId = state?.shipmentId || localStorage.getItem("shipmentId");
 
-  localStorage.setItem("courierId", selectedCourier._id);
+  useEffect(() => {
+    if (selectedCourier?._id) {
+      localStorage.setItem("courierId", selectedCourier._id);
+    }
+  }, [selectedCourier]);
 
   useEffect(() => {
     if (state?.shipmentId) {
@@ -26,13 +31,9 @@ export default function SelectCourier() {
     queryKey: ["couriers", search, page],
     queryFn: async () => {
       const res = await axiosClient.get("/api/v1/couriers", {
-        params: {
-          search,
-          page,
-          limit: 6,
-        },
+        params: { search, page, limit: 4 },
       });
-      return res.data;
+      return res.data.data;
     },
     keepPreviousData: true,
   });
@@ -129,7 +130,7 @@ export default function SelectCourier() {
               value={search}
               onChange={(e) => {
                 setSearch(e.target.value);
-                setPage(1); // reset page when searching
+                setPage(1);
               }}
               className="px-4 py-2 border rounded-lg w-80 outline-none focus:ring-2 focus:ring-[#83fba5]"
             />
@@ -198,13 +199,7 @@ export default function SelectCourier() {
                     </td>
 
                     <td className="px-6 py-5 text-center">
-                      <span
-                        className={`px-3 py-1 text-[10px] font-black rounded-full ${
-                          courier.status === "ACTIVE"
-                            ? "bg-[#83fba5] text-[#00743a]"
-                            : "bg-[#001736] text-white"
-                        }`}
-                      >
+                      <span className={getStatusStyle(courier.status)}>
                         {courier.status}
                       </span>
                     </td>
@@ -231,7 +226,7 @@ export default function SelectCourier() {
 
           {/* ADD PAGINATION UI  for pages*/}
 
-          <div className="flex justify-between items-center mt-4">
+          <div className="flex justify-between items-center mb-2 px-4">
             <span className="text-sm">
               Page {page} of {totalPages}
             </span>
@@ -349,7 +344,7 @@ export default function SelectCourier() {
             <button
               disabled={!selectedCourier || !shipmentId}
               onClick={handleCourier}
-              className={`px-10 py-4 text-white font-black text-lg rounded-xl ${
+              className={`px-10 py-4  text-white font-black text-lg rounded-xl ${
                 selectedCourier && shipmentId
                   ? "bg-[#006d36] hover:scale-105"
                   : "bg-gray-400 cursor-not-allowed"

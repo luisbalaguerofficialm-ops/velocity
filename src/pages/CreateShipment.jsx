@@ -1,12 +1,13 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import axiosClient from "../utils/axiosClient";
 import { toast } from "sonner";
 
+// 💳 checkout + payment integration
+
 export default function CreateShipment() {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
 
   // Initial state structured for your backend's req.body destructuring
   const [formData, setFormData] = useState({
@@ -27,14 +28,23 @@ export default function CreateShipment() {
     declaredValue: "",
     dimensions: { length: 0, width: 0, height: 0 },
     serviceLevel: "",
-    courier: "Auto-assign (Recommended)",
+    courier: "",
+  });
+
+  //  FOR PRICE CACULATION
+  const [price, setPrice] = useState({
+    baseRate: 0,
+    weightSurcharge: 0,
+    priorityFee: 0,
+    fuelAdjustment: 0,
+    total: 0,
   });
   // 🚀 TanStack Mutation for Creating Shipment
   const { mutate, isLoading } = useMutation({
     mutationFn: (newShipment) => {
       return axiosClient.post("/api/v1/shipments", newShipment);
     },
-    onSuccess: (data) => {
+    onSuccess: (res) => {
       toast.success("Shipment created and simulation started!");
       navigate("/admin/shipment-successful", {
         state: { shipment: res.data.data },
@@ -46,6 +56,30 @@ export default function CreateShipment() {
       toast.error(message);
     },
   });
+
+  // ============FETCH PRICE=========================
+
+  const { mutate: calculatePrice } = useMutation({
+    mutationFn: (data) =>
+      axiosClient.post("/api/v1/shipments/calculate-price", data),
+
+    onSuccess: (res) => {
+      setPrice(res.data.data);
+    },
+  });
+
+  /* ================= FETCH COURIERS ================= */
+
+  const { data, isLoading: courierLoading } = useQuery({
+    queryKey: ["couriers"],
+    queryFn: async () => {
+      const res = await axiosClient.get("/api/v1/couriers");
+
+      return res.data.data;
+    },
+  });
+
+  const couriers = data?.data || [];
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -61,7 +95,28 @@ export default function CreateShipment() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    mutate(formData);
+
+    const payload = {
+      ...formData,
+
+      // ✅ Fix numbers properly
+      weight: Number(formData.weight) || 0,
+      quantity: Number(formData.quantity) || 0,
+      declaredValue: formData.declaredValue
+        ? Number(formData.declaredValue)
+        : 0,
+
+      dimensions: {
+        length: Number(formData.dimensions.length) || 0,
+        width: Number(formData.dimensions.width) || 0,
+        height: Number(formData.dimensions.height) || 0,
+      },
+
+      // ✅ Fix courier null issue
+      courier: formData.courier || null,
+    };
+
+    mutate(payload);
   };
 
   const handleDimensionChange = (e) => {
@@ -71,6 +126,27 @@ export default function CreateShipment() {
       dimensions: { ...prev.dimensions, [name]: value },
     }));
   };
+
+  // -=================Auto-calculate when form changes==========================
+  React.useEffect(() => {
+    if (!formData.weight || !formData.serviceLevel) return;
+
+    const timer = setTimeout(() => {
+      calculatePrice({
+        weight: Number(formData.weight),
+        quantity: Number(formData.quantity),
+        declaredValue: Number(formData.declaredValue || 0),
+        serviceLevel: formData.serviceLevel,
+      });
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [
+    formData.weight,
+    formData.quantity,
+    formData.declaredValue,
+    formData.serviceLevel,
+  ]);
 
   return (
     <div className="bg-[#f8fcf9] font-body text-[#00210e] antialiased">
@@ -514,6 +590,7 @@ export default function CreateShipment() {
                     <label className="block text-xs font-semibold text-[#717972] uppercase tracking-wider mb-2">
                       Assign Courier
                     </label>
+
                     <div className="relative">
                       <select
                         name="courier"
@@ -521,21 +598,23 @@ export default function CreateShipment() {
                         onChange={handleChange}
                         className="w-full bg-[#e7e9e7] border-none rounded-lg px-4 py-3 text-sm appearance-none focus:ring-2 focus:ring-[#006d36]/20"
                       >
-                        <option>Auto-assign (Recommended)</option>
-                        <option>
-                          {formData.courier || "Select a courier"}
-                        </option>
-                        <option>
-                          {formData.courierNearby || "Nearby Couriers"}
-                        </option>
-                        <option>
-                          {formData.courierOnRoute || "On-route Couriers"}
-                        </option>
+                        <option value="">Auto-assign (Recommended)</option>
+
+                        {courierLoading ? (
+                          <option disabled>Loading couriers...</option>
+                        ) : (
+                          couriers
+                            .filter((c) => c.status === "active")
+                            .map((courier) => (
+                              <option key={courier._id} value={courier._id}>
+                                {courier.fullName} (
+                                {courier.email || "No email"})
+                              </option>
+                            ))
+                        )}
                       </select>
-                      <span
-                        className="absolute right-3 top-1/2 -translate-y-1/2 material-symbols-outlined pointer-events-none text-[#717972]"
-                        data-icon="expand_more"
-                      >
+
+                      <span className="absolute right-3 top-1/2 -translate-y-1/2 material-symbols-outlined pointer-events-none text-[#717972]">
                         expand_more
                       </span>
                     </div>
@@ -574,25 +653,36 @@ export default function CreateShipment() {
                     <span className="text-emerald-100/60 text-sm">
                       Base Rate
                     </span>
-                    <span className="font-bold">$00.00</span>
+                    <span className="font-bold">
+                      ${(price.baseRate || 0).toFixed(2)}
+                    </span>
                   </div>
                   <div className="flex justify-between items-center pb-4 border-b border-white/10">
                     <span className="text-emerald-100/60 text-sm">
                       Weight Surcharge
                     </span>
-                    <span className="font-bold">$00.00</span>
+                    <span className="font-bold">
+                      {" "}
+                      ${(price.weightSurcharge || 0).toFixed(2)}
+                    </span>
                   </div>
                   <div className="flex justify-between items-center pb-4 border-b border-white/10">
                     <span className="text-emerald-100/60 text-sm">
                       Priority Fee
                     </span>
-                    <span className="text-emerald-400 font-bold">+$00.00</span>
+                    <span className="text-emerald-400 font-bold">
+                      {" "}
+                      ${(price.priorityFee || 0).toFixed(2)}
+                    </span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-emerald-100/60 text-sm">
                       Fuel Adjustment
                     </span>
-                    <span className="font-bold">$0.00</span>
+                    <span className="font-bold">
+                      {" "}
+                      ${(price.fuelAdjustment || 0).toFixed(2)}
+                    </span>
                   </div>
                 </div>
                 <div className="mb-8">
@@ -600,12 +690,12 @@ export default function CreateShipment() {
                     Total Estimated Cost
                   </div>
                   <div className="text-4xl font-headline font-extrabold text-emerald-400">
-                    $00.00
+                    ${(price.total || 0).toFixed(2)}
                   </div>
                 </div>
                 <button
                   type="submit"
-                  disabled={loading}
+                  disabled={isLoading}
                   className="w-full bg-[#006d36] text-white font-bold py-4 rounded-xl flex items-center justify-center gap-2 hover:opacity-90 active:scale-95 transition-all shadow-lg shadow-[#006d36]/20"
                 >
                   <span
@@ -614,7 +704,7 @@ export default function CreateShipment() {
                   >
                     add_circle
                   </span>
-                  {loading ? "PROCESSING..." : "CREATE SHIPMENT"}
+                  {isLoading ? "PROCESSING..." : "CREATE SHIPMENT"}
                 </button>
               </div>
             </div>

@@ -8,6 +8,7 @@ import {
   X,
   Truck,
   Plus,
+  User,
 } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import Logo from "./Logo";
@@ -134,6 +135,9 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
             </NavButton>
             <NavButton to="/admin/view-in-fleet" icon={Truck}>
               view-in-fleet
+            </NavButton>
+            <NavButton to="/admin/select-courier" icon={User}>
+              select-courier
             </NavButton>
           </div>
         </div>

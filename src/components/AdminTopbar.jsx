@@ -12,6 +12,7 @@ export default function AdminTopbar() {
   const [showNotif, setShowNotif] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [page, setPage] = useState(1);
 
   const notifRef = useRef();
   const profileRef = useRef();
@@ -33,9 +34,9 @@ export default function AdminTopbar() {
 
   /* ================= FETCH NOTIFICATIONS ================= */
   const { data: notificationData } = useQuery({
-    queryKey: ["notifications"],
+    queryKey: ["notifications", page],
     queryFn: async () => {
-      const res = await axiosClient.get("/api/v1/notifications");
+      const res = await axiosClient.get(`/api/v1/notifications?page=${page}`);
       return res.data;
     },
   });
