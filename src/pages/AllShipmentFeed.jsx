@@ -34,12 +34,12 @@ export default function AllShipmentFeed() {
   /* =========================
      HANDLERS
   ========================= */
-  const handleShipmentEdit = (shipment) => {
-    navigate("/admin/edit-shipment", { state: shipment });
+  const handleEditShipment = () => {
+    navigate(`/admin/edit-shipment/${id}`);
   };
 
   const handleShipmentDetail = (shipment) => {
-    navigate("/admin/shipment-detail", { state: shipment });
+    navigate(`/admin/shipment-detail/${shipment._id}`);
   };
 
   const handleCreateShipment = () => {
