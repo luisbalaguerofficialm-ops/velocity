@@ -15,6 +15,19 @@ export default function SelectCourier() {
   const { state } = useLocation();
   const shipmentId = state?.shipmentId || localStorage.getItem("shipmentId");
 
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+
+  /* =========================
+   DEBOUNCE SEARCH
+========================= */
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [search]);
+
   useEffect(() => {
     if (selectedCourier?._id) {
       localStorage.setItem("courierId", selectedCourier._id);
@@ -27,14 +40,21 @@ export default function SelectCourier() {
     }
   }, [state]);
 
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ["couriers", search, page],
+  const { data, isError } = useQuery({
+    queryKey: ["couriers", debouncedSearch, page],
+
     queryFn: async () => {
       const res = await axiosClient.get("/api/v1/couriers", {
-        params: { search, page, limit: 4 },
+        params: {
+          search: debouncedSearch,
+          page,
+          limit: 5,
+        },
       });
+
       return res.data.data;
     },
+
     keepPreviousData: true,
   });
   const couriers = data?.data || [];
@@ -77,13 +97,7 @@ export default function SelectCourier() {
   const handleNewCourier = () => {
     navigate("/admin/add-courier");
   };
-  /* ================= LOADING ================= */
-  if (isLoading) {
-    return <p className="p-6">Loading couriers...</p>;
-  }
-  if (isError) {
-    return <p className="p-6 text-red-500">Failed to load couriers</p>;
-  }
+
   return (
     <div className="bg-[#e2fffe] text-[#002020]">
       {/* <!-- Main Content --> */}
@@ -100,7 +114,7 @@ export default function SelectCourier() {
               >
                 info
               </span>
-              Shipment #{shipmentId || "N/A"} Created
+              Shipment #{shipmentId} Created
             </p>
           </div>
           <div className="flex gap-3">

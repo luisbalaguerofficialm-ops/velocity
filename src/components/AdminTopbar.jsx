@@ -7,8 +7,6 @@ import { toast } from "sonner";
 export default function AdminTopbar() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-
-  const [search, setSearch] = useState("");
   const [showNotif, setShowNotif] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
@@ -42,15 +40,8 @@ export default function AdminTopbar() {
   });
 
   const notifications = notificationData?.data || [];
-  const unreadCount = notificationData?.unreadCount || 0;
-
-  /* ================= SEARCH ================= */
-  const handleSearch = (e) => {
-    if (e.key === "Enter" && search.trim()) {
-      navigate(`/admin/track/${search}`);
-      setSearch("");
-    }
-  };
+  const unreadCount =
+    notificationData?.data?.filter((n) => n.status === "pending").length || 0;
 
   /* ================= LOGOUT ================= */
   const handleLogout = async () => {
@@ -79,32 +70,83 @@ export default function AdminTopbar() {
       if (notifRef.current && !notifRef.current.contains(e.target)) {
         setShowNotif(false);
       }
+
       if (profileRef.current && !profileRef.current.contains(e.target)) {
         setShowProfile(false);
       }
     };
+
     document.addEventListener("mousedown", handleClickOutside);
+
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   return (
-    <header className="sticky top-2 z-40 bg-white/80 backdrop-blur-md shadow-sm flex justify-between items-center h-27 rounded-xl px-8 w-344 mx-auto text-slate-500 border-b border-[#c4c6d0]/30">
-      {/* ================= SEARCH ================= */}
-      <div className="flex items-center gap-4">
-        <div className="bg-[#e7e8e9] px-3 py-1.5 rounded flex items-center gap-2">
+    <header className="sticky top-2 z-40 bg-white/80 backdrop-blur-md shadow-sm flex justify-end items-center h-27 rounded-xl px-8 w-344 mx-auto text-slate-500 border-b border-[#c4c6d0]/30">
+      {/* ================= SEARCH =================
+      <div className="flex items-center gap-4 relative">
+        <div className="bg-[#e7e8e9] px-3 py-1.5 rounded flex items-center gap-2 relative">
           <span className="material-symbols-outlined text-lg">search</span>
+
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            onKeyDown={handleSearch}
-            className="bg-transparent border-none focus:ring-0 text-sm w-64"
+            className="bg-transparent border-none focus:ring-0 text-sm w-64 outline-none"
             placeholder="Track shipment or courier..."
           />
+
+          {isSearching && (
+            <span className="text-[10px] text-[#006d36] font-bold animate-pulse">
+              Searching...
+            </span>
+          )}
         </div>
-      </div>
+
+        {searchResults?.length > 0 ? (
+          <div className="max-h-96 overflow-y-auto">
+            {searchResults.map((item) => (
+              <button
+                key={item._id}
+                onClick={() => handleSearchNavigation(item)}
+                className="w-full text-left px-4 py-4 hover:bg-[#f4ffff] border-b border-gray-100 transition-all"
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-bold text-[#001736] text-sm">
+                      {item.fullName || item.receiver?.name || "Unknown"}
+                    </p>
+
+                    <p className="text-xs text-gray-500 mt-1">
+                      {item.employeeId || item.trackingId || item.email}
+                    </p>
+                  </div>
+
+                  <div>
+                    {item.employeeId ? (
+                      <span className="text-[10px] bg-[#d7fafa] text-[#001736] px-2 py-1 rounded-full font-bold uppercase">
+                        Courier
+                      </span>
+                    ) : (
+                      <span className="text-[10px] bg-[#001736] text-white px-2 py-1 rounded-full font-bold uppercase">
+                        Shipment
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </button>
+            ))}
+          </div>
+        ) : (
+          !isSearching && (
+            <div className="p-5 text-center text-sm text-gray-500">
+              No results found
+            </div>
+          )
+        )}
+      </div> */}
 
       {/* ================= RIGHT ================= */}
-      <div className="flex items-center gap-6">
+      <div className="justify-end flex items-center gap-6">
         {/* 🔔 NOTIFICATIONS */}
         <div className="relative" ref={notifRef}>
           <div
@@ -122,7 +164,7 @@ export default function AdminTopbar() {
 
           {/* 🔽 DROPDOWN */}
           {showNotif && (
-            <div className="absolute right-0 mt-2 w-80 bg-white shadow-lg rounded-xl p-4 z-50">
+            <div className="absolute right-0 mt-2 top-4 w-80 bg-white shadow-lg rounded-xl p-4 z-30">
               <h3 className="font-bold text-sm mb-3">Notifications</h3>
 
               {notifications.length === 0 ? (
@@ -136,13 +178,14 @@ export default function AdminTopbar() {
                       onClick={() => navigate(`/admin/message/${n._id}`)}
                     >
                       <p className="text-sm font-semibold">{n.title}</p>
+
                       <p className="text-xs text-gray-500 truncate">
                         {n.message}
                       </p>
 
-                      {n.unreadCount > 0 && (
+                      {n.status === "pending" && (
                         <span className="text-[10px] text-red-500 font-bold">
-                          {n.unreadCount} new
+                          New
                         </span>
                       )}
                     </div>
@@ -170,6 +213,7 @@ export default function AdminTopbar() {
               <p className="text-sm font-bold text-[#002B5B]">
                 {admin?.name || "Loading..."}
               </p>
+
               <p className="text-xs text-slate-500">{admin?.role || "Admin"}</p>
             </div>
 
@@ -194,7 +238,7 @@ export default function AdminTopbar() {
 
               <button
                 onClick={() => {
-                  setShowProfile(false); // 👈 close dropdown first
+                  setShowProfile(false);
                   setShowLogoutModal(true);
                 }}
                 className="block w-full text-left px-3 py-2 text-sm text-red-500 hover:bg-gray-50 rounded"
@@ -205,8 +249,10 @@ export default function AdminTopbar() {
           )}
         </div>
       </div>
+
+      {/* ================= LOGOUT MODAL ================= */}
       {showLogoutModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#e2fffe] backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 top-20 left-70 flex items-center justify-center bg-[#e2fffe] backdrop-blur-sm">
           <div className="bg-white w-[90%] max-w-sm rounded-2xl shadow-xl p-6 animate-in fade-in zoom-in">
             <h2 className="text-lg font-bold text-[#001b3d]">Confirm Logout</h2>
 
@@ -216,7 +262,6 @@ export default function AdminTopbar() {
             </p>
 
             <div className="flex justify-end gap-3 mt-6">
-              {/* Cancel */}
               <button
                 onClick={() => setShowLogoutModal(false)}
                 className="px-4 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 text-sm"
@@ -224,7 +269,6 @@ export default function AdminTopbar() {
                 Cancel
               </button>
 
-              {/* Confirm */}
               <button
                 onClick={async () => {
                   setShowLogoutModal(false);

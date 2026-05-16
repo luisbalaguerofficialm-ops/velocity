@@ -15,7 +15,7 @@ export const getServiceLevelStyle = (level = "") => {
     case "economy":
       return `${base} bg-gray-200 text-gray-600`;
 
-    case "sky_cargo":
+    case "first_class":
       return `${base} bg-indigo-100 text-indigo-700`;
 
     default:

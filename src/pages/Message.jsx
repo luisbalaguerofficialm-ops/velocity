@@ -1,18 +1,31 @@
 import React, { useState, useEffect, useRef } from "react";
+import EmojiPicker from "emoji-picker-react";
 import axiosClient from "../utils/axiosClient";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSocket } from "../context/SocketProvider";
-import { Video, Phone, MoreVertical, Send } from "lucide-react";
-import { useParams } from "react-router-dom";
+import {
+  Video,
+  Phone,
+  MoreVertical,
+  Send,
+  Trash2,
+  Paperclip,
+  Smile,
+} from "lucide-react";
+import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 
 export default function Message() {
+  const navigate = useNavigate();
+  const emojiPickerRef = useRef(null);
   const { conversationId: routeConversationId } = useParams();
   const queryClient = useQueryClient();
   const socket = useSocket();
   const [conversationId, setConversationId] = useState(null);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [text, setText] = useState("");
   const [page, setPage] = useState(1);
+  const [previewMedia, setPreviewMedia] = useState(null);
 
   const [confirmModal, setConfirmModal] = useState({
     open: false,
@@ -82,23 +95,71 @@ export default function Message() {
     },
   });
 
+  //  =================1ADMIN UPLOAD send images/videos================================
+
+  const fileInputRef = useRef(null);
+
+  const handleFileChange = async (e) => {
+    try {
+      const files = Array.from(e.target.files);
+      if (!files.length || !conversationId) return;
+
+      const formData = new FormData();
+
+      const current = conversationData;
+
+      formData.append("conversationId", conversationId);
+
+      formData.append(
+        "trackingId",
+        current?.trackingId || current?.externalRef || "",
+      );
+
+      files.forEach((file) => {
+        formData.append("files", file);
+      });
+
+      const res = await axiosClient.post(
+        "/api/v1/notifications/admin/chat/upload",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        },
+      );
+
+      toast.success("Files uploaded successfully");
+
+      queryClient.invalidateQueries({
+        queryKey: ["conversation", conversationId],
+      });
+    } catch (error) {
+      console.error(error);
+      toast.error(error?.response?.data?.message || "Upload failed");
+    }
+  };
+
   //================ DELETE conversation (your sidebar button)==========================
+  //================ DELETE conversation / item ==========================
   const { mutate: deleteConversation, isPending: deletingConversation } =
     useMutation({
-      mutationFn: (conversationId) =>
-        axiosClient.delete(
-          `/api/v1/notifications/conversation/${conversationId}`,
-        ),
+      mutationFn: (itemId) =>
+        axiosClient.delete(`/api/v1/notifications/item/${itemId}`),
 
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ["notifications"] });
+        queryClient.invalidateQueries({
+          predicate: (query) => query.queryKey[0] === "notifications",
+        });
+
+        queryClient.removeQueries({
+          queryKey: ["conversation", conversationId],
+        });
+
         setConversationId(null);
+        // navigate("/admin/messages");
 
-        toast.success("Conversation deleted successfully");
-      },
-
-      onError: () => {
-        toast.error("Failed to delete conversation");
+        toast.success("Deleted successfully");
       },
     });
 
@@ -121,6 +182,22 @@ export default function Message() {
       toast.error("Failed to delete message");
     },
   });
+
+  //   for emoji close
+
+  // useEffect(() => {
+  //   const handleClickOutside = (e) => {
+  //     if (
+  //       emojiPickerRef.current &&
+  //       !emojiPickerRef.current.contains(e.target)
+  //     ) {
+  //       setShowEmojiPicker(false);
+  //     }
+  //   };
+
+  //   document.addEventListener("mousedown", handleClickOutside);
+  //   return () => document.removeEventListener("mousedown", handleClickOutside);
+  // }, []);
 
   // =====================
   // Handle confirm action
@@ -149,6 +226,15 @@ export default function Message() {
       conversationId: null,
       messageId: null,
     });
+  };
+
+  //   OPEN IMAGE OR VIDOE
+  const openPreview = (file) => {
+    setPreviewMedia(file);
+  };
+
+  const closePreview = () => {
+    setPreviewMedia(null);
   };
 
   /* ======================================================
@@ -238,6 +324,9 @@ export default function Message() {
                         <p className="font-bold text-sm truncate max-w-[150px]">
                           {item.guestName || item.guestEmail || "Guest"}
                         </p>
+                        <p className="text-[10px] text-blue-500">
+                          {item.trackingId}
+                        </p>
                         <span className="text-[9px] text-[#006d36] font-bold uppercase tracking-tighter">
                           {item.source || "Direct"}
                         </span>
@@ -251,9 +340,9 @@ export default function Message() {
                             conversationId: item._id,
                           });
                         }}
-                        className="w-13 h-5 border text-red-500 bg-red-50 text-sm rounded-md hover:bg-red-100 transition-colors cursor-pointer"
+                        className="text-red-500 bg-red-50 text-sm hover:bg-red-100 transition-colors cursor-pointer"
                       >
-                        delete
+                        <Trash2 className="w-5 h-5" />
                       </button>
                     </div>
 
@@ -330,7 +419,41 @@ export default function Message() {
                           : "bg-white text-gray-800 border border-gray-200 rounded-tl-none"
                       }`}
                     >
-                      {msg.text}
+                      {/* ATTACHMENTS */}
+                      {msg?.attachments?.map((file, i) => (
+                        <div key={i}>
+                          {file?.type?.startsWith("image") ? (
+                            <img
+                              src={file.url}
+                              alt="attachment"
+                              onClick={() => openPreview(file)}
+                              className="rounded-lg max-w-full max-h-72 object-cover cursor-pointer hover:opacity-90"
+                            />
+                          ) : file?.type?.startsWith("video") ? (
+                            <video
+                              className="rounded-lg max-w-full max-h-72 cursor-pointer"
+                              onClick={() => openPreview(file)}
+                            >
+                              <source src={file.url} />
+                            </video>
+                          ) : (
+                            <a
+                              href={file.url}
+                              target="_blank"
+                              className="text-blue-500 underline"
+                            >
+                              {file.name}
+                            </a>
+                          )}
+                        </div>
+                      ))}
+
+                      {/* TEXT */}
+                      {msg?.text && (
+                        <div className="px-4 py-2">
+                          <p>{msg.text}</p>
+                        </div>
+                      )}
                     </div>
 
                     {/* 🗑 DELETE BUTTON (hover) */}
@@ -353,29 +476,97 @@ export default function Message() {
               <div ref={messagesEndRef} />
             </div>
 
-            <div className="p-4 border-t bg-white flex gap-3">
-              <input
-                value={text}
-                onChange={(e) => setText(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleSend()}
-                className="flex-1 border border-gray-200 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Write a reply..."
-              />
-              <button
-                disabled={!text.trim() || !conversationId || isSending}
-                onClick={handleSend}
-                className={`p-2 rounded-xl transition-all ${
-                  isSending
-                    ? "bg-gray-300 cursor-not-allowed"
-                    : "bg-[#001736] text-white hover:bg-black"
-                }`}
-              >
-                <Send size={20} />
-              </button>
+            <div className="p-4 border-t border-gray-200 justify-center bg-white flex gap-3">
+              {/* FILE */}
+              <div className="flex items-center w-150 gap-3 bg-[#d9f6f5] rounded-2xl px-3 py-2">
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="text-gray-600 hover:text-black"
+                >
+                  <Paperclip size={20} />
+                </button>
+
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  multiple
+                  hidden
+                  onChange={handleFileChange}
+                />
+
+                <div className="relative" ref={emojiPickerRef}>
+                  <button
+                    onClick={() => setShowEmojiPicker((prev) => !prev)}
+                    className="text-gray-600 hover:text-black"
+                  >
+                    <Smile size={20} />
+                  </button>
+
+                  {showEmojiPicker && (
+                    <div className="absolute bottom-14 left-0 z-50 shadow-2xl rounded-2xl overflow-hidden">
+                      <EmojiPicker
+                        theme="light"
+                        searchDisabled={false}
+                        skinTonesDisabled={false}
+                        previewConfig={{
+                          showPreview: false,
+                        }}
+                        onEmojiClick={(emojiData) => {
+                          setText((prev) => prev + emojiData.emoji);
+                          // setShowEmojiPicker(false);
+                        }}
+                      />
+                    </div>
+                  )}
+                </div>
+                <input
+                  value={text}
+                  onChange={(e) => setText(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleSend()}
+                  className="flex-1 border border-gray-200 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Write a reply..."
+                />
+                <button
+                  disabled={!text.trim() || !conversationId || isSending}
+                  onClick={handleSend}
+                  className={`p-2 rounded-xl transition-all ${
+                    isSending
+                      ? "bg-gray-300 cursor-not-allowed"
+                      : "bg-[#001736] text-white hover:bg-black"
+                  }`}
+                >
+                  <Send size={20} />
+                </button>
+              </div>
             </div>
           </section>
         </div>
       </main>
+      {/* ==================== OPEN AND CLOSE IMAGE AND VIDEO============================= */}
+      {previewMedia && (
+        <div
+          onClick={closePreview}
+          className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
+        >
+          <div className="max-w-4xl max-h-[90vh]">
+            {previewMedia.type?.startsWith("image") ? (
+              <img
+                src={previewMedia.url}
+                className="max-w-full max-h-[90vh] rounded-lg"
+              />
+            ) : (
+              <video
+                controls
+                autoPlay
+                className="max-w-full max-h-[90vh] rounded-lg"
+              >
+                <source src={previewMedia.url} />
+              </video>
+            )}
+          </div>
+        </div>
+      )}
+      {/* ===============CONFIRM DELETE======================== */}
       {confirmModal.open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
           <div className="bg-white w-[90%] max-w-sm rounded-2xl shadow-xl p-6 animate-in fade-in zoom-in">

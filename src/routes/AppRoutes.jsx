@@ -56,6 +56,7 @@ const AdminProfile = lazy(() => import("../components/AdminProfile.jsx"));
 const AdminCourierProfile = lazy(
   () => import("../components/AdminCourierProfile.jsx"),
 );
+const LiveChat = lazy(() => import("../components/LiveChat.jsx"));
 
 /* =========================
    🔐 Auth / Standalone
@@ -95,6 +96,7 @@ export default function AppRoutes() {
               path: "tracking-detail/:trackingId",
               element: <TrackingDetail />,
             },
+            { path: "live-chat", element: <LiveChat /> },
             { path: "tracking", element: <Tracking /> },
             { path: "about-us", element: <AboutUs /> },
             { path: "contact-us", element: <ContactUs /> },

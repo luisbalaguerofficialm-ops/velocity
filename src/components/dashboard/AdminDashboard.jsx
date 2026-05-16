@@ -288,7 +288,7 @@ export default function AdminDashboard() {
                   onClick={handleViewinFleet}
                   className="w-full mt-8 py-2 text-[#002B5B] font-bold text-sm bg-[#edeeef] hover:bg-[#e7e8e9] rounded transition-colors"
                 >
-                  Manage All Couriers
+                  All Couriers
                 </button>
               </div>
               <div className="bg-[#10b981] p-6 rounded relative overflow-hidden shadow-lg group">

@@ -144,7 +144,7 @@ export default function Services() {
                   data-alt="Modern electric delivery van parked at a sleek charging station in a bright, clean sustainable logistics warehouse"
                   src="https://lh3.googleusercontent.com/aida-public/AB6AXuDzZGqEvy7OsA2EEB6riRZGUoQ919tgLc9gg5xdmMo6Q_CZW5cCquJ2wGxzrUf-F_I6ghTDESIR9CKOR7eGTQSMI5RLs2sL2In2K53DvnHs3_-Yzt73l85cnMBYRVCZ2n9WL9ZO8FG25Awk9oYjq4KX4oB2lJs5HZegsuqBdWycJ-fFm8e1QBFFtpcOkKk0lqZ7klI3n01KnVAc6gpfx01uJ_h2nfsh1r_N0ljRqciv_jidEGk0zdeK0e-m_3N0EebmIE7jsfNHIxuv"
                 />
-                <div className="absolute top-4 left-4 bg-secondary text-white text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full">
+                <div className="absolute top-4 left-4 bg-[#006d36] text-white text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full">
                   Eco-Certified
                 </div>
               </div>
@@ -245,102 +245,18 @@ export default function Services() {
           </div>
         </section>
       </main>
-      {/* <!-- Footer --> */}
-      <footer className="bg-[#001736] dark:bg-[#000b1a] w-full rounded-t-none border-t border-[#002b5b]">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-12 px-12 py-20">
-          <div>
-            <div className="text-2xl font-black text-[#83fba5] uppercase tracking-widest mb-8">
-              Kinetic
-            </div>
-            <p className="font-manrope text-sm font-light tracking-wide text-[#c6e9e9]/60 leading-relaxed max-w-xs">
-              Precision logistics for the modern era. Seamless global
-              connectivity through aerodynamic infrastructure.
-            </p>
-          </div>
-          <div>
-            <div className="flex flex-col space-y-4">
-              <a
-                className="font-manrope text-sm font-light tracking-wide text-[#c6e9e9]/60 hover:text-[#83fba5] transition-all duration-200"
-                href="#"
-              >
-                Global Network
-              </a>
-              <a
-                className="font-manrope text-sm font-light tracking-wide text-[#c6e9e9]/60 hover:text-[#83fba5] transition-all duration-200"
-                href="#"
-              >
-                Shipping Tiers
-              </a>
-              <a
-                className="font-manrope text-sm font-light tracking-wide text-[#c6e9e9]/60 hover:text-[#83fba5] transition-all duration-200"
-                href="#"
-              >
-                Flash Delivery
-              </a>
-              <a
-                className="font-manrope text-sm font-light tracking-wide text-[#c6e9e9]/60 hover:text-[#83fba5] transition-all duration-200"
-                href="#"
-              >
-                Sky Freight
-              </a>
-            </div>
-          </div>
-          <div>
-            <h4 className="text-[#e2fffe] font-bold mb-6 text-xs uppercase tracking-[0.2em]">
-              Sustainability
-            </h4>
-            <div className="flex flex-col space-y-4">
-              <a
-                className="font-manrope text-sm font-light tracking-wide text-[#c6e9e9]/60 hover:text-[#83fba5] transition-all duration-200"
-                href="#"
-              >
-                Green Initiatives
-              </a>
-              <a
-                className="font-manrope text-sm font-light tracking-wide text-[#c6e9e9]/60 hover:text-[#83fba5] transition-all duration-200"
-                href="#"
-              >
-                Sustainability Report
-              </a>
-            </div>
-          </div>
-          <div>
-            <h4 className="text-[#e2fffe] font-bold mb-6 text-xs uppercase tracking-[0.2em]">
-              Legal
-            </h4>
-            <div className="flex flex-col space-y-4">
-              <a
-                className="font-manrope text-sm font-light tracking-wide text-[#c6e9e9]/60 hover:text-[#83fba5] transition-all duration-200"
-                href="#"
-              >
-                Carrier Terms
-              </a>
-              <a
-                className="font-manrope text-sm font-light tracking-wide text-[#c6e9e9]/60 hover:text-[#83fba5] transition-all duration-200"
-                href="#"
-              >
-                Privacy Policy
-              </a>
-            </div>
-          </div>
-        </div>
-        <div className="px-12 py-8 border-t border-[#002b5b] flex justify-between items-center">
-          <div className="flex gap-6">
-            <span
-              className="material-symbols-outlined text-[#c6e9e9]/60 hover:text-[#83fba5] cursor-pointer"
-              data-icon="public"
-            >
-              public
-            </span>
-            <span
-              className="material-symbols-outlined text-[#c6e9e9]/60 hover:text-[#83fba5] cursor-pointer"
-              data-icon="language"
-            >
-              language
-            </span>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }
+
+
+
+
+
+
+
+
+
+
+
+ 

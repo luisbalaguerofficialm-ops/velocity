@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import axiosClient from "../utils/axiosClient";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router";
+import { toast } from "sonner";
 
 export default function NotificationHistory() {
   const navigate = useNavigate();
@@ -12,7 +13,7 @@ export default function NotificationHistory() {
   /* ======================================================
      📡 FETCH NOTIFICATIONS
   ====================================================== */
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, refetch } = useQuery({
     queryKey: ["notifications-history", page, search],
     queryFn: async () => {
       const res = await axiosClient.get("/api/v1/notifications", {
@@ -76,36 +77,36 @@ export default function NotificationHistory() {
           <Stat title="Failed" value={stats.failed} />
         </section>
         {/* <!-- Main Data Table: Kinetic Precision --> */}
-        <div class="bg-[#ffffff] rounded-2xl shadow-sm overflow-hidden border border-[#c4c6d0]/10">
-          <div class="overflow-x-auto custom-scrollbar">
-            <table class="w-full text-left border-collapse">
+        <div className="bg-[#ffffff] rounded-2xl shadow-sm overflow-hidden border border-[#c4c6d0]/10">
+          <div className="overflow-x-auto custom-scrollbar">
+            <table className="w-full text-left border-collapse">
               <thead>
-                <tr class="bg-surface-container-low">
-                  <th class="px-6 py-5 text-label-sm font-bold text-[#001736] uppercase tracking-widest border-b border-[#c4c6d0]/20">
+                <tr className="bg-surface-container-low">
+                  <th className="px-6 py-5 text-label-sm font-bold text-[#001736] uppercase tracking-widest border-b border-[#c4c6d0]/20">
                     Notification Title
                   </th>
-                  <th class="px-6 py-5 text-label-sm font-bold text-[#001736] uppercase tracking-widest border-b border-[#c4c6d0]/20">
+                  <th className="px-6 py-5 text-label-sm font-bold text-[#001736] uppercase tracking-widest border-b border-[#c4c6d0]/20">
                     Channel
                   </th>
-                  <th class="px-6 py-5 text-label-sm font-bold text-[#001736] uppercase tracking-widest border-b border-[#c4c6d0]/20">
+                  <th className="px-6 py-5 text-label-sm font-bold text-[#001736] uppercase tracking-widest border-b border-[#c4c6d0]/20">
                     Audience Target
                   </th>
-                  <th class="px-6 py-5 text-label-sm font-bold text-[#001736] uppercase tracking-widest border-b border-[#c4c6d0]/20 text-center">
+                  <th className="px-6 py-5 text-label-sm font-bold text-[#001736] uppercase tracking-widest border-b border-[#c4c6d0]/20 text-center">
                     Sent Count
                   </th>
-                  <th class="px-6 py-5 text-label-sm font-bold text-[#001736] uppercase tracking-widest border-b border-[#c4c6d0]/20">
+                  <th className="px-6 py-5 text-label-sm font-bold text-[#001736] uppercase tracking-widest border-b border-[#c4c6d0]/20">
                     Timestamp
                   </th>
-                  <th class="px-6 py-5 text-label-sm font-bold text-[#001736] uppercase tracking-widest border-b border-[#c4c6d0]/20">
+                  <th className="px-6 py-5 text-label-sm font-bold text-[#001736] uppercase tracking-widest border-b border-[#c4c6d0]/20">
                     Created By
                   </th>
-                  <th class="px-6 py-5 text-label-sm font-bold text-[#001736] uppercase tracking-widest border-b border-[#c4c6d0]/20">
+                  <th className="px-6 py-5 text-label-sm font-bold text-[#001736] uppercase tracking-widest border-b border-[#c4c6d0]/20">
                     Status
                   </th>
-                  <th class="px-6 py-5 text-label-sm font-bold text-[#001736] uppercase tracking-widest border-b border-[#c4c6d0]/20"></th>
+                  <th className="px-6 py-5 text-label-sm font-bold text-[#001736] uppercase tracking-widest border-b border-[#c4c6d0]/20"></th>
                 </tr>
               </thead>
-              <tbody class="divide-y divide-[#c4c6d0]/10">
+              <tbody className="divide-y divide-[#c4c6d0]/10">
                 {isLoading ? (
                   <tr>
                     <td
@@ -122,35 +123,35 @@ export default function NotificationHistory() {
                       onClick={() =>
                         navigate(`/admin/message/${notification._id}`)
                       }
-                      class="hover:bg-[#d2f5f4]/30 transition-colors cursor-pointer"
+                      className="hover:bg-[#d2f5f4]/30 transition-colors cursor-pointer"
                     >
-                      <td class="px-6 py-4">
-                        <div class="flex flex-col">
-                          <span class="text-sm font-bold text-[#001736]">
+                      <td className="px-6 py-4">
+                        <div className="flex flex-col">
+                          <span className="text-sm font-bold text-[#001736]">
                             {notification.title}
                           </span>
                         </div>
                       </td>
-                      <td class="px-6 py-4">
-                        <div class="flex gap-2">
-                          <span class="px-2 py-1 bg-[#001736] text-white text-[10px] font-bold rounded uppercase">
+                      <td className="px-6 py-4">
+                        <div className="flex gap-2">
+                          <span className="px-2 py-1 bg-[#001736] text-white text-[10px] font-bold rounded uppercase">
                             {notification.channel || "email"}
                           </span>
                         </div>
                       </td>
-                      <td class="px-6 py-4">
-                        <span class="text-sm font-medium text-[#002020]">
+                      <td className="px-6 py-4">
+                        <span className="text-sm font-medium text-[#002020]">
                           {notification.targetAudience ||
                             notification.receiverEmail}
                         </span>
                       </td>
-                      <td class="px-6 py-4 text-center">
-                        <span class="text-sm font-extrabold text-[#001736]">
+                      <td className="px-6 py-4 text-center">
+                        <span className="text-sm font-extrabold text-[#001736]">
                           {notification.sentCount || 1}
                         </span>
                       </td>
-                      <td class="px-6 py-4">
-                        <span class="text-sm font-medium text-[#001736]">
+                      <td className="px-6 py-4">
+                        <span className="text-sm font-medium text-[#001736]">
                           {new Date(
                             notification.createdAt,
                           ).toLocaleDateString()}
@@ -177,11 +178,13 @@ export default function NotificationHistory() {
                         </div>
                       </td>
                       <td class="px-6 py-4 text-right">
-                        <button class="text-[#001736] hover:text-[#00743a] transition-colors">
-                          <span class="material-symbols-outlined">
-                            more_vert
-                          </span>
-                        </button>
+                        <div>
+                          <button class="text-[#001736] hover:text-[#00743a] transition-colors">
+                            <span class="material-symbols-outlined">
+                              more_vert
+                            </span>
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))
@@ -277,6 +280,43 @@ export default function NotificationHistory() {
           <span>Kinetic Precision Design System</span>
         </div>
       </footer>
+      {/* DELETE MODAL */}
+      {/* {deleteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white w-[90%] max-w-md rounded-2xl p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-200"
+          >
+            <h2 className="text-xl font-extrabold text-[#001736] mb-3">
+              Delete Conversation
+            </h2>
+
+            <p className="text-sm text-[#43474f] leading-relaxed">
+              Are you sure you want to delete this conversation? This action
+              cannot be undone.
+            </p>
+
+            <div className="flex justify-end gap-3 mt-6">
+              <button
+                onClick={() => {
+                  setDeleteModal(false);
+                  setSelectedConversation(null);
+                }}
+                className="px-5 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-[#001736] font-semibold transition-colors"
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={confirmDeleteConversation}
+                className="px-5 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white font-semibold transition-colors"
+              >
+                Yes, Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )} */}
     </div>
   );
 }

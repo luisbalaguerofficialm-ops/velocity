@@ -5,6 +5,7 @@ import { useMutation } from "@tanstack/react-query";
 import axiosClient from "../utils/axiosClient";
 import { toast } from "sonner";
 import { useState } from "react";
+import cogo from "../assets/air-cargo-1024x768.jpg";
 
 export default function Tracking() {
   const navigate = useNavigate();
@@ -94,7 +95,7 @@ export default function Tracking() {
         {/* <!-- Real-time Status Dashboard --> */}
         <section className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           <div className="lg:col-span-7 bg-[#d2f5f4] rounded-3xl p-13 relative overflow-hidden">
-            <div className="absolute top-0 right-0 p-8">
+            <div className="absolute md:top-0 top-0 right-0 p-4">
               <span className="bg-[#83fba5] text-[#00743a] px-4 py-2 rounded-full text-xs font-bold flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-[#006d36] animate-pulse"></span>
                 LIVE UPDATE
@@ -307,7 +308,7 @@ export default function Tracking() {
                 alt="Delivery verification"
                 className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 scale-105 group-hover:scale-100"
                 data-alt="A close-up of a professional in a grey suit using a digital tablet for signature verification with high-end transit van background"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBbeGly_RPvBQPug4ffHHjxelkBHGX9FKklz53SBPw9Cxl9CDtCRcJd3WK6A6BmUzy7Ey4nfIU2OTnZVPpCTn0a3nAosZIgmK7_xhmkLcBBwGwyecnHHzBlACDJihZyVfbJXSfKrQsCWUW88GWEa3VDUnQLO4vPkcS8hK_oqowV3SUqx6PxDGEu3Jm47k4jAPWsXVJhGl_7qePivBvATqVdhfk1PV1RNjD40UnzUgp_c1gHUPKhdy1fpM4Q--I_hi4DO3uwD8l4bGME"
+                src={cogo}
               />
               <div className="absolute inset-0 bg-gradient-to-t from-[#001736]/90 to-transparent flex flex-col justify-end p-8">
                 <span className="text-[#83fba5] text-xs font-bold mb-2">

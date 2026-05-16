@@ -156,11 +156,9 @@ export default function ContactUs() {
                   disabled={
                     mutation.isPending || !formData.email || !formData.message
                   }
-                  className="w-full kinetic-gradient text-[#ffffff] py-5 rounded-xl font-bold tracking-wide flex items-center justify-center gap-3 group transition-all"
+                  className="w-full text-2xl kinetic-gradient text-[#ffffff] py-5 rounded-xl font-bold tracking-wide flex items-center justify-center gap-3 group transition-all"
                 >
-                  {mutation.isPending
-                    ? "Sending..."
-                    : "Initialize Transmission"}
+                  {mutation.isPending ? "Sending..." : "send message"}
                   <span
                     className="material-symbols-outlined transition-transform group-hover:translate-x-1"
                     data-icon="send"
@@ -228,9 +226,7 @@ export default function ContactUs() {
                   Direct Support
                 </h4>
                 <p className="text-[#002020] leading-relaxed font-medium">
-                  ops@velocitytransit.com
-                  <br />
-                  global.network@velocity.com
+                  https://www.velocitytransit.xyz
                 </p>
               </div>
             </div>

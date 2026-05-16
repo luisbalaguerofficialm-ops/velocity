@@ -568,6 +568,50 @@ export default function CreateShipment() {
                         className="absolute top-4 right-4 text-[#006d36] focus:ring-[#006d36]"
                         type="radio"
                         name="serviceLevel"
+                        value="flash_priority"
+                        checked={formData.serviceLevel === "flash_priority"}
+                        onChange={handleChange}
+                      />
+                      <span
+                        className="material-symbols-outlined text-[#717972] mb-2"
+                        data-icon="schedule"
+                      >
+                        schedule
+                      </span>
+                      <span className="font-bold text-[#191c1d]">
+                        Flash_Priority
+                      </span>
+                      <span className="text-[11px] text-[#717972] font-medium">
+                        6-8 Business Days
+                      </span>
+                    </label>
+                    <label className="relative flex flex-col p-4 border border-[#c0c9c1] rounded-xl cursor-pointer hover:border-[#006d36]/40 transition-all">
+                      <input
+                        className="absolute top-4 right-4 text-[#006d36] focus:ring-[#006d36]"
+                        type="radio"
+                        name="serviceLevel"
+                        value="first_class"
+                        checked={formData.serviceLevel === "first_class"}
+                        onChange={handleChange}
+                      />
+                      <span
+                        className="material-symbols-outlined text-[#717972] mb-2"
+                        data-icon="schedule"
+                      >
+                        schedule
+                      </span>
+                      <span className="font-bold text-[#191c1d]">
+                        First Class
+                      </span>
+                      <span className="text-[11px] text-[#717972] font-medium">
+                        9-11 Business Days
+                      </span>
+                    </label>
+                    <label className="relative flex flex-col p-4 border border-[#c0c9c1] rounded-xl cursor-pointer hover:border-[#006d36]/40 transition-all">
+                      <input
+                        className="absolute top-4 right-4 text-[#006d36] focus:ring-[#006d36]"
+                        type="radio"
+                        name="serviceLevel"
                         value="economy"
                         checked={formData.serviceLevel === "economy"}
                         onChange={handleChange}
@@ -580,7 +624,7 @@ export default function CreateShipment() {
                       </span>
                       <span className="font-bold text-[#191c1d]">Economy</span>
                       <span className="text-[11px] text-[#717972] font-medium">
-                        5-7 Business Days
+                        12-15 Business Days
                       </span>
                     </label>
                   </div>

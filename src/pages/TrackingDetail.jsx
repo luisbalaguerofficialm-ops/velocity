@@ -1,19 +1,20 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Helmet } from "react-helmet";
-
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import axiosClient from "../utils/axiosClient";
 import { toast } from "sonner";
-
 import ShipmentMap from "../components/ShipmentMap";
 import socket, { connectSocket } from "../utils/Socket";
+import LiveChat from "../components/LiveChat";
 
 export default function TrackingDetail() {
   const { trackingId } = useParams();
   const queryClient = useQueryClient();
-
+  const [chatOpen, setChatOpen] = useState(false);
+  const [openChat, setOpenChat] = useState(false);
   const [liveLocation, setLiveLocation] = useState(null);
+  const [conversationId, setConversationId] = useState(null);
 
   // ===============================
   // 📡 FETCH TRACKING DATA (React Query)
@@ -28,6 +29,24 @@ export default function TrackingDetail() {
     },
     enabled: !!trackingId,
   });
+
+  const openChatHandler = async () => {
+    try {
+      const res = await axiosClient.post(
+        "/api/v1/notifications/tracking-chat/start",
+        {
+          trackingId,
+          email: data?.receiver?.email,
+        },
+      );
+
+      setConversationId(res.data.data._id);
+      setOpenChat(true);
+    } catch (err) {
+      console.log(err);
+      toast.error("Failed to start chat");
+    }
+  };
 
   // ===============================
   // 🔌 SOCKET CONNECTION (LIVE TRACKING)
@@ -324,7 +343,7 @@ export default function TrackingDetail() {
             {/* <!-- Right Panel: Map & Timeline --> */}
             <div className="lg:col-span-8 space-y-8">
               {/* <!-- Kinetic Map View --> */}
-              <div className="h-[450px] bg-surface-dim rounded-[2rem] overflow-hidden relative shadow-inner">
+              <div className="h-[550px] bg-[#bee1e0] rounded-[2rem] overflow-hidden relative shadow-inner">
                 <ShipmentMap
                   route={data.map?.route || []}
                   currentLocation={currentLocation}
@@ -480,6 +499,32 @@ export default function TrackingDetail() {
           </div>
         </footer>
       </div>
+      {/* FLOATING CHAT BUTTON */}
+      <button
+        onClick={openChatHandler}
+        className="fixed bottom-6 right-6 z-50 w-16 h-16 rounded-full bg-[#006d36] text-white shadow-2xl flex items-center justify-center hover:scale-105 transition-all"
+      >
+        <span
+          className="material-symbols-outlined"
+          style={{ fontVariationSettings: "'FILL' 1" }}
+        >
+          chat
+        </span>
+      </button>
+      {/* CHAT WIDGET */}
+      {/* CHAT WIDGET */}
+      {openChat && (
+        <div className="fixed inset-0 z-50 flex items-end justify-end bg-black/20 backdrop-blur-sm p-4">
+          <div className="w-full max-w-md h-[85vh] bg-white rounded-3xl overflow-hidden shadow-2xl">
+            <LiveChat
+              closeChat={() => setOpenChat(false)}
+              conversationId={conversationId}
+              trackingId={trackingId}
+              guestEmail={data?.receiver?.email}
+            />
+          </div>
+        </div>
+      )}
     </>
   );
 }

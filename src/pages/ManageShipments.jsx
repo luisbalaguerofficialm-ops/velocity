@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import axiosClient from "../utils/axiosClient";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
@@ -12,23 +12,70 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export default function ManageShipments() {
+  const navigate = useNavigate();
+
+  // STATES (must be top-level)
   const [page, setPage] = useState(1);
   const [status, setStatus] = useState("all");
   const [serviceLevel, setServiceLevel] = useState("all");
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [shipmentToDelete, setShipmentToDelete] = useState(null);
+  // REAL SEARCH INPUT
   const [search, setSearch] = useState("");
+  // DEBOUNCED SEARCH SENT TO BACKEND
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [selected, setSelected] = useState([]);
 
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ["shipments", page, status, serviceLevel, search],
+  /* =========================
+   DEBOUNCE SEARCH
+========================= */
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  const { data, isFetching } = useQuery({
+    queryKey: ["shipments", page, status, serviceLevel, debouncedSearch],
+
     queryFn: async () => {
+      const params = {
+        page,
+        limit: 5,
+      };
+
+      // STATUS
+      if (status !== "all") {
+        params.status = status;
+      }
+
+      // SERVICE LEVEL
+      if (serviceLevel !== "all") {
+        params.serviceLevel = serviceLevel;
+      }
+
+      // SEARCH
+      if (debouncedSearch.trim()) {
+        params.search = debouncedSearch.trim();
+      }
+
       const res = await axiosClient.get("/api/v1/shipments", {
-        params: { page, status, serviceLevel, search, limit: 5 },
+        params,
       });
 
       return res.data.data;
     },
+
+    keepPreviousData: true,
+
+    staleTime: 1000 * 60 * 5,
+
+    refetchOnWindowFocus: false,
   });
   const shipments = data?.data || [];
   const pagination = data?.pagination || {};
@@ -48,8 +95,8 @@ export default function ManageShipments() {
     }
   };
 
-  const handleView = (id) => {
-    window.location.href = `/admin/shipments/${id}`;
+  const handleView = (shipment) => {
+    navigate(`/admin/shipment-detail/${shipment._id}`);
   };
 
   // delete shipment
@@ -69,10 +116,11 @@ export default function ManageShipments() {
   // active Service button
 
   const getServiceClass = (value) =>
-    serviceLevel === value
-      ? "bg-[#83fba5] text-[#00743a]"
-      : "bg-[#d2f5f4] text-[#43474f] hover:bg-[#ccefee]";
-
+    `px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-colors ${
+      serviceLevel === value
+        ? "bg-[#83fba5] text-[#00743a]"
+        : "bg-[#d2f5f4] text-[#43474f] hover:bg-[#ccefee]"
+    }`;
   //   active Status button
   const getStatusClass = (value) =>
     `px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-colors ${
@@ -81,72 +129,125 @@ export default function ManageShipments() {
         : "bg-[#d2f5f4] text-[#43474f] hover:bg-[#ccefee]"
     }`;
 
-  if (isLoading) return <p>Loading shipment...</p>;
-  if (isError)
-    return (
-      <p className="text-red-500">Failed to load shipments. Please retry.</p>
-    );
-
   return (
     <div className="bg-surface text-on-surface selection:bg-secondary-container selection:text-on-secondary-container">
       {/* <!-- Main Wrapper (Removed ml-64 since sidebar is gone) --> */}
       <main className="min-h-screen flex flex-col">
         {/* <!-- Content Area --> */}
         <div className="p-8 space-y-8 flex-1">
+          {/* SEARCH */}
+          <div className="space-y-1.5">
+            <label className="block text-[10px] font-bold text-[#43474f] uppercase tracking-widest pl-1">
+              Search Shipment
+            </label>
+
+            <input
+              type="text"
+              placeholder="Tracking ID, email, receiver..."
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage(1);
+              }}
+              className="w-[280px] px-4 py-3 rounded-xl border border-[#ccefee] bg-white outline-none focus:ring-2 focus:ring-[#006d36]"
+            />
+
+            {isFetching && (
+              <p className="text-[10px] text-[#006d36] font-bold animate-pulse">
+                Updating shipments...
+              </p>
+            )}
+          </div>
           {/* <!-- Filters & Bulk Actions Toolbar --> */}
           <section className="flex flex-wrap items-end justify-between gap-6">
             <div className="flex flex-wrap gap-4 items-center">
               <div className="space-y-1.5">
-                <label className="block text-[10px] font-bold text-[#43474f] uppercase tracking-widest pl-1">
+                <label className="block text-[15px] mb-3 font-bold text-black uppercase tracking-widest pl-1">
                   Status Filter
                 </label>
 
                 <div className="flex gap-2">
                   <button
-                    onClick={() => setStatus("all")}
+                    onClick={() => {
+                      setStatus("all");
+                      setPage(1);
+                    }}
                     className={getStatusClass("all")}
                   >
                     All Status
                   </button>
 
                   <button
-                    onClick={() => setStatus("in_transit")}
+                    onClick={() => {
+                      setStatus("in_transit");
+                      setPage(1);
+                    }}
                     className={getStatusClass("in_transit")}
                   >
                     In-Transit
                   </button>
 
                   <button
-                    onClick={() => setStatus("delayed")}
+                    onClick={() => {
+                      setStatus("delayed");
+                      setPage(1);
+                    }}
                     className={getStatusClass("delayed")}
                   >
                     Delayed
                   </button>
                 </div>
               </div>
-              <div className="h-10 w-[1px] bg-[#c4c6d0]/30 mt-5"></div>
+              <div className="h-10 w-[4px] bg-black mt-5"></div>
               <div className="space-y-1.5">
-                <label className="block text-[10px] font-bold text-[#43474f] uppercase tracking-widest pl-1">
+                <label className="block text-[15px] mb-3  font-bold text-black uppercase tracking-widest pl-1">
                   Service Level
                 </label>
                 <div className="flex gap-2">
                   <button
-                    onClick={() => setServiceLevel("all")}
+                    onClick={() => {
+                      setServiceLevel("all");
+                      setPage(1);
+                    }}
                     className={getServiceClass("all")}
                   >
                     All Service Levels
                   </button>
                   <button
-                    onClick={() => setServiceLevel("priority")}
+                    onClick={() => {
+                      setServiceLevel("priority");
+                      setPage(1);
+                    }}
                     className={getServiceClass("priority")}
                   >
                     Flash Priority
                   </button>
                   <button
-                    onClick={() => setServiceLevel("economy")}
+                    onClick={() => {
+                      setServiceLevel("economy");
+                      setPage(1);
+                    }}
                     className={getServiceClass("economy")}
                   >
                     Economy
+                  </button>
+                  <button
+                    onClick={() => {
+                      setServiceLevel("standard");
+                      setPage(1);
+                    }}
+                    className={getServiceClass("standard")}
+                  >
+                    Standard
+                  </button>
+                  <button
+                    onClick={() => {
+                      setServiceLevel("first_class");
+                      setPage(1);
+                    }}
+                    className={getServiceClass("first_class")}
+                  >
+                    First Class
                   </button>
                 </div>
               </div>
@@ -266,14 +367,17 @@ export default function ManageShipments() {
                       {/* actions */}
                       <td className="p-5 flex items-center text-right space-x-2">
                         <button
-                          onClick={() => handleView(s._id)}
+                          onClick={() => handleView(s)}
                           className="p-2 hover:bg-white rounded-lg"
                         >
                           <Eye className="w-5 h-5" />
                         </button>
 
                         <button
-                          onClick={() => handleDelete(s._id)}
+                          onClick={() => {
+                            setShipmentToDelete(s);
+                            setShowDeleteModal(true);
+                          }}
                           className="p-2 hover:bg-[#ffdad6] text-[#ba1a1a]"
                         >
                           <Trash2 className="w-5 h-5" />
@@ -374,6 +478,71 @@ export default function ManageShipments() {
           </section>
         </div>
       </main>
+      {/* DELETE CONFIRMATION MODAL */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4">
+          <div className="w-full max-w-md rounded-3xl bg-white shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            {/* HEADER */}
+            <div className="p-6 border-b border-[#ececec]">
+              <div className="flex items-center gap-4">
+                <div className="w-14 h-14 rounded-full bg-[#ffdad6] flex items-center justify-center">
+                  <Trash2 className="w-7 h-7 text-[#ba1a1a]" />
+                </div>
+
+                <div>
+                  <h2 className="text-xl font-extrabold text-[#001736]">
+                    Delete Shipment
+                  </h2>
+
+                  <p className="text-sm text-[#5c5f66]">
+                    This action cannot be undone.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* BODY */}
+            <div className="p-6">
+              <div className="bg-[#fff8f7] border border-[#ffdad6] rounded-2xl p-4">
+                <p className="text-sm text-[#43474f] leading-relaxed">
+                  Are you sure you want to delete this shipment?
+                </p>
+
+                {shipmentToDelete?.trackingId && (
+                  <div className="mt-3 text-xs font-bold text-[#ba1a1a] uppercase tracking-wider">
+                    Tracking ID: {shipmentToDelete.trackingId}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* FOOTER */}
+            <div className="flex justify-end gap-3 p-6 border-t border-[#ececec] bg-[#fafafa]">
+              <button
+                onClick={() => {
+                  setShowDeleteModal(false);
+                  setShipmentToDelete(null);
+                }}
+                className="px-5 py-2.5 rounded-xl border border-[#d0d5dd] text-[#43474f] font-semibold hover:bg-gray-100 transition-all"
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={async () => {
+                  await handleDelete(shipmentToDelete._id);
+
+                  setShowDeleteModal(false);
+                  setShipmentToDelete(null);
+                }}
+                className="px-5 py-2.5 rounded-xl bg-[#ba1a1a] text-white font-bold hover:bg-[#8f1515] transition-all active:scale-95"
+              >
+                Yes, Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
