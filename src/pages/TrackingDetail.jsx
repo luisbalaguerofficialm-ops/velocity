@@ -132,7 +132,7 @@ export default function TrackingDetail() {
                   schedule
                 </span>
                 <span className="font-semibold text-[#006d36]">
-                  {etaText(shipment)}
+                  {etaText(data)}
                 </span>
               </p>
             </div>
@@ -357,15 +357,15 @@ export default function TrackingDetail() {
             {/* <!-- Right Panel: Map & Timeline --> */}
             <div className="lg:col-span-8 space-y-8">
               {/* <!-- Kinetic Map View --> */}
-              <div className="h-[550px] bg-[#bee1e0] rounded-[2rem] overflow-hidden relative shadow-inner">
-                {/* <ShipmentMap
+              {/* <div className="h-[550px] bg-[#bee1e0] rounded-[2rem] overflow-hidden relative shadow-inner">
+                <ShipmentMap
                   route={data.map?.route || []}
                   currentLocation={currentLocation}
                   routeIndex={0}
                   shipmentId={data.trackingId}
-                /> */}
+                />
                 {/* <!-- Glassmorphic Map Overlay --> */}
-                <div className="absolute top-6 left-6 glass-panel p-4 rounded-2xl border border-white/20 shadow-xl">
+                {/* <div className="absolute top-6 left-6 glass-panel p-4 rounded-2xl border border-white/20 shadow-xl">
                   <div className="flex items-center gap-3">
                     <div className="w-3 h-3 bg-[#006d36] rounded-full animate-pulse"></div>
                     <div>
@@ -381,7 +381,7 @@ export default function TrackingDetail() {
                     </div>
                   </div>
                 </div>
-              </div>
+              </div>  */}
               {/* <!-- Vertical Delivery Path Bento Section --> */}
               <div className="bg-[#ccefee] rounded-[2rem] p-10">
                 <h3 className="text-xl font-extrabold text-[#001736] mb-10 tracking-tight">
@@ -396,7 +396,7 @@ export default function TrackingDetail() {
                     return (
                       <div
                         key={step.key}
-                        className={`relative p-6 rounded-2xl transition-all duration-300
+                        className={`relative p-6 rounded-3xl transition-all duration-300
           
           ${isCompleted && "bg-white border-b-4 border-[#006d36]"}
           ${isActive && "bg-[#001736] text-white shadow-xl scale-105 z-10 ring-2 ring-[#83fba5]"}

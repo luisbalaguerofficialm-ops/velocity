@@ -54,12 +54,12 @@ export default function Navbar() {
                 Contact Us
               </NavLink>
             </div>
-            <NavLink
+            {/* <NavLink
               to="/payment-security"
               className="border text-[#001736] border-green-300 px-6 py-2.5 rounded-lg font-bold  hover:scale-95 transition-transform duration-200"
             >
               Payment
-            </NavLink>
+            </NavLink> */}
           </div>
 
           {/* Mobile Button */}
