@@ -63,19 +63,6 @@ export default function LiveChat({
     }
   }, [conversationId]);
 
-  // //  FETCH COURIER ASSINGED THE SHIPMENT
-  const fetchCourier = async (courierId) => {
-    try {
-      if (!courierId) return;
-
-      const res = await axiosClient.get(`/api/v1/couriers/${courierId}`);
-
-      setCourier(res.data.data);
-    } catch (error) {
-      console.error("FETCH COURIER ERROR:", error);
-    }
-  };
-
   /* ======================================================
      AUTO SCROLL
   ====================================================== */
@@ -261,7 +248,7 @@ export default function LiveChat({
      ONLINE STATUS
   ====================================================== */
 
-  const courierOnline = onlineUsers?.includes(courier?._id);
+  // const courierOnline = onlineUsers?.includes(courier?._id);
 
   return (
     <div className="h-full w-full bg-[#e2fffe] rounded-3xl overflow-hidden">
@@ -272,7 +259,7 @@ export default function LiveChat({
 
         <header className="h-20 px-6 border-b bg-white flex items-center justify-between shrink-0">
           <div className="flex items-center gap-4">
-            <div className="relative">
+            {/* <div className="relative">
               <img
                 src={
                   courier?.profilePhoto ||
@@ -290,17 +277,17 @@ export default function LiveChat({
                   courierOnline ? "bg-green-500" : "bg-gray-400"
                 }`}
               />
-            </div>
-
+            </div> */}
+            {/* 
             <div>
               <h2 className="font-bold text-[#001736] text-lg">
                 {courier?.fullName || "Support Team"}
               </h2>
 
-              {/* <p className="text-sm text-gray-500">
+              <p className="text-sm text-gray-500">
                 {typing ? "typing..." : courierOnline ? "Online" : "Offline"}
-              </p> */}
-            </div>
+              </p>
+            </div> */}
           </div>
 
           <div className="flex items-center gap-3">
@@ -520,9 +507,7 @@ export default function LiveChat({
           <div className="mt-2 flex justify-between text-[10px] text-gray-400 px-1">
             <span>{uploading ? "Uploading..." : "End-to-End Encrypted"}</span>
 
-            <span>
-              {courierOnline ? "Secure Connection" : "Waiting for courier"}
-            </span>
+            <span>Powered by Velocity Transit</span>
           </div>
         </footer>
       </div>
