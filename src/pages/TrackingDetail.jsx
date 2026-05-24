@@ -4,7 +4,7 @@ import { Helmet } from "react-helmet";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import axiosClient from "../utils/axiosClient";
 import { toast } from "sonner";
-import ShipmentMap from "../components/ShipmentMap";
+// import ShipmentMap from "../components/ShipmentMap";
 import socket, { connectSocket } from "../utils/Socket";
 import LiveChat from "../components/LiveChat";
 
@@ -88,6 +88,18 @@ export default function TrackingDetail() {
 
   const currentLocation = liveLocation || data.map?.currentLocation || null;
 
+  const etaText = (shipment) => {
+    if (shipment.status === "delivered") {
+      return "Completed";
+    }
+
+    if (shipment?.eta?.etaDays) {
+      return `${shipment.eta.etaDays.min}-${shipment.eta.etaDays.max} days`;
+    }
+
+    return shipment?.eta?.type === "predicted" ? "Predicting..." : "N/A";
+  };
+
   return (
     <>
       <Helmet>
@@ -119,7 +131,9 @@ export default function TrackingDetail() {
                 >
                   schedule
                 </span>
-                Estimated Delivery: {data.eta?.etaDays}Days
+                <span className="font-semibold text-[#006d36]">
+                  {etaText(shipment)}
+                </span>
               </p>
             </div>
             <div className="flex gap-4">
@@ -344,12 +358,12 @@ export default function TrackingDetail() {
             <div className="lg:col-span-8 space-y-8">
               {/* <!-- Kinetic Map View --> */}
               <div className="h-[550px] bg-[#bee1e0] rounded-[2rem] overflow-hidden relative shadow-inner">
-                <ShipmentMap
+                {/* <ShipmentMap
                   route={data.map?.route || []}
                   currentLocation={currentLocation}
                   routeIndex={0}
                   shipmentId={data.trackingId}
-                />
+                /> */}
                 {/* <!-- Glassmorphic Map Overlay --> */}
                 <div className="absolute top-6 left-6 glass-panel p-4 rounded-2xl border border-white/20 shadow-xl">
                   <div className="flex items-center gap-3">

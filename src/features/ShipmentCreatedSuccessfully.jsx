@@ -60,10 +60,9 @@ export default function ShipmentCreatedSuccessfully() {
     });
   };
 
-  const handleShipmentDetail = (shipment) => {
+  const handleShipmentDetail = () => {
     navigate(`/admin/shipment-detail/${shipment._id}`);
   };
-
   return (
     <div className="bg-[#e2fffe] text-[#002020] min-h-screen flex flex-col">
       <main className="flex-grow flex flex-col items-center justify-center p-6 md:p-12 relative overflow-hidden">

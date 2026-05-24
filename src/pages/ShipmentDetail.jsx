@@ -75,6 +75,7 @@ export default function ShipmentDetail() {
   const receiverName = shipment?.receiver?.name || "N/A";
   const courier = shipment?.courier;
   const milestones = shipment?.milestones || [];
+  const etaDays = shipment?.prediction?.etaDays;
 
   /* ================= DERIVED OS STATE ================= */
   const route = shipment?.map?.route || [];
@@ -101,6 +102,27 @@ export default function ShipmentDetail() {
     navigate(`/admin/edit-shipment/${id}`);
   };
 
+  const handleAssignCourier = () => {
+    navigate("/admin/select-courier", {
+      state: {
+        shipmentId: shipment?._id,
+      },
+    });
+  };
+  // CACULATE DAYS
+  const etaText = (shipment) => {
+    if (shipment.status === "delivered") {
+      return "Completed";
+    }
+
+    if (shipment?.eta?.etaDays) {
+      return `${shipment.eta.etaDays.min}-${shipment.eta.etaDays.max} days`;
+    }
+
+    return shipment?.eta?.type === "predicted" ? "Predicting..." : "N/A";
+  };
+
+  // -------------------========================
   const handleMessageReceiver = () => {
     navigate("/admin/message", { state: { email: receiverEmail } });
   };
@@ -135,10 +157,8 @@ export default function ShipmentDetail() {
             </h1>
             <p className="text-[#43474f] max-w-lg">
               Priority High-Value Transit. Estimated arrival:{" "}
-              <span className="text-[#006d36] font-bold">
-                {shipment?.eta?.etaDays
-                  ? `${shipment.eta.etaDays} Days`
-                  : "In Transit"}
+              <span className="font-semibold text-[#006d36]">
+                {etaText(shipment)}
               </span>
             </p>
 
@@ -191,12 +211,25 @@ export default function ShipmentDetail() {
               Message Receiver
             </button>
 
-            <button
+            {/* <button
               onClick={() => handleLiveMap()}
               className="px-5 py-2.5 bg-[#001736]  text-[#ffffff] font-bold rounded-xl text-sm flex items-center gap-2 hover:bg-surface-dim transition-colors"
             >
               Open Live Map
-            </button>
+            </button> */}
+
+            {/* SHOW ONLY IF NO COURIER EXISTS */}
+            {!courier && (
+              <button
+                onClick={handleAssignCourier}
+                className="px-5 py-2.5 bg-[#006d36] text-white font-bold rounded-xl text-sm flex items-center gap-2 shadow-md hover:shadow-lg transition-all active:scale-95"
+              >
+                <span className="material-symbols-outlined text-sm">
+                  local_shipping
+                </span>
+                Assign Courier
+              </button>
+            )}
             <button
               onClick={handleEditShipment}
               className="px-5 py-2.5 bg-[#001736]  text-[#ffffff] font-bold rounded-xl text-sm flex items-center gap-2 hover:bg-surface-dim transition-colors"
@@ -315,15 +348,19 @@ export default function ShipmentDetail() {
                         Vehicle Type
                       </span>
                       <span className="text-[#001736]">
-                        {courier.vehicle?.type || "Standard Transit"}
+                        {courier?.vehicle?.type ||
+                          courier?.vehicle ||
+                          "Standard Transit"}
                       </span>
                     </div>
                     <div className="flex justify-between text-xs font-bold">
                       <span className="text-[#43474f]/60 uppercase text-[9px]">
                         courier status
                       </span>
-                      <span className={getStatusStyle(courier.status)}>
-                        {courier.status}
+                      <span
+                        className={getStatusStyle(courier?.status || "offline")}
+                      >
+                        {courier?.status || "offline"}
                       </span>
                     </div>
                     <div className="flex justify-between text-xs font-bold">
@@ -331,7 +368,7 @@ export default function ShipmentDetail() {
                         Plate Number
                       </span>
                       <span className="text-[#001736]">
-                        {courier.vehicle?.plateNumber || "N/A"}
+                        {courier?.vehicle?.plateNumber || "N/A"}
                       </span>
                     </div>
                   </div>

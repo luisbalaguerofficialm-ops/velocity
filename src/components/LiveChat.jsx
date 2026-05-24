@@ -24,6 +24,7 @@ export default function LiveChat({
   const [uploading, setUploading] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewFile, setPreviewFile] = useState(null);
+ 
 
   /* ======================================================
      LOAD CONVERSATION
@@ -47,6 +48,10 @@ export default function LiveChat({
 
       setConversation(data);
       setMessages(data?.messages || []);
+
+      if (data?.assignedCourier) {
+        fetchCourier(data.assignedCourier);
+      }
     } catch (error) {
       console.error("FETCH CONVERSATION ERROR:", error);
     }
@@ -57,6 +62,19 @@ export default function LiveChat({
       fetchConversation();
     }
   }, [conversationId]);
+
+  // //  FETCH COURIER ASSINGED THE SHIPMENT
+  // const fetchCourier = async (courierId) => {
+  //   try {
+  //     if (!courierId) return;
+
+  //     const res = await axiosClient.get(`/api/v1/couriers/${courierId}`);
+
+  //     setCourier(res.data.data);
+  //   } catch (error) {
+  //     console.error("FETCH COURIER ERROR:", error);
+  //   }
+  // };
 
   /* ======================================================
      AUTO SCROLL
@@ -243,7 +261,7 @@ export default function LiveChat({
      ONLINE STATUS
   ====================================================== */
 
-  const courierOnline = onlineUsers?.includes(conversation?.assignedCourier);
+  // const courierOnline = onlineUsers?.includes(courier?._id);
 
   return (
     <div className="h-full w-full bg-[#e2fffe] rounded-3xl overflow-hidden">
@@ -255,10 +273,13 @@ export default function LiveChat({
         <header className="h-20 px-6 border-b bg-white flex items-center justify-between shrink-0">
           <div className="flex items-center gap-4">
             <div className="relative">
-              <img
+              {/* <img
                 src={
-                  conversation?.assignedCourierPhoto ||
-                  "https://ui-avatars.com/api/?name=Courier"
+                  courier?.profilePhoto ||
+                  courier?.avatar ||
+                  `https://ui-avatars.com/api/?name=${
+                    courier?.fullName || "Courier"
+                  }`
                 }
                 alt="Courier"
                 className="w-12 h-12 rounded-full object-cover"
@@ -273,27 +294,38 @@ export default function LiveChat({
 
             <div>
               <h2 className="font-bold text-[#001736] text-lg">
-                {conversation?.assignedCourierName || "Support"}
+                {courier?.fullName || "Support Team"}
               </h2>
 
               <p className="text-sm text-gray-500">
                 {typing ? "typing..." : courierOnline ? "Online" : "Offline"}
-              </p>
+              </p> */}
             </div>
           </div>
 
           <div className="flex items-center gap-3">
-            <button className="w-11 h-11 rounded-xl bg-[#dff7f7] flex items-center justify-center hover:scale-105 transition">
+            <p
+              className="w-11 h-11 rounded-xl bg-[#dff7f7]
+      flex items-center justify-center
+      hover:scale-105 transition"
+            >
               <Phone size={18} />
-            </button>
+            </p>
 
-            <button className="w-11 h-11 rounded-xl bg-[#dff7f7] flex items-center justify-center hover:scale-105 transition">
+            <p
+              className="w-11 h-11 rounded-xl bg-[#dff7f7]
+      flex items-center justify-center
+      hover:scale-105 transition"
+            >
               <MapPinned size={18} />
-            </button>
+            </p>
 
             <button
               onClick={closeChat}
-              className="w-11 h-11 rounded-xl bg-red-100 text-red-600 flex items-center justify-center hover:scale-105 transition"
+              className="w-11 h-11 rounded-xl
+      bg-red-100 text-red-600
+      flex items-center justify-center
+      hover:scale-105 transition"
             >
               <X size={18} />
             </button>

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { ChevronLeft, ChevronRight, ArrowRight, Play, X } from "lucide-react";
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { useMutation } from "@tanstack/react-query";
 import axiosClient from "../utils/axiosClient";
 import { toast } from "sonner";
@@ -111,13 +111,9 @@ export default function HomePage() {
               Schedule your pickup in under 60 seconds with our streamlined
               booking engine.
             </p>
-            <a
-              className="text-[#006d3e] font-bold inline-flex items-center gap-2 group-hover:gap-4 transition-all"
-              href="#"
-            >
-              Get Started
-              <ArrowRight className="h-4 w-4" />
-            </a>
+            <p className="text-[#006d3e] font-bold inline-flex items-center gap-2 group-hover:gap-4 transition-all">
+              Book Now
+            </p>
           </div>
           {/* <!-- Card: Find a Station --> */}
           <div className="bg-[#ffffff] p-8 rounded-xl shadow-[0_12px_32px_rgba(0,23,54,0.06)] group hover:-translate-y-2 transition-transform duration-300">
@@ -133,13 +129,14 @@ export default function HomePage() {
               Locate our premium concierge hubs and drop-off points across the
               global network.
             </p>
-            <a
+            <Link
+              to="/tracking"
               className="text-[#006d3e] font-bold inline-flex items-center gap-2 group-hover:gap-4 transition-all"
               href="#"
             >
-              View Map{" "}
+              Track your shipment with map{" "}
               <span className="material-symbols-outlined">arrow_forward</span>
-            </a>
+            </Link>
           </div>
           {/* <!-- Card: Price Calculator --> */}
           <div className="bg-[#ffffff] p-8 rounded-xl shadow-[0_12px_32px_rgba(0,23,54,0.06)] group hover:-translate-y-2 transition-transform duration-300">
@@ -155,13 +152,13 @@ export default function HomePage() {
               Transparent, real-time pricing for domestic and international
               transit options.
             </p>
-            <a
+            <p
               className="text-[#006d3e] font-bold inline-flex items-center gap-2 group-hover:gap-4 transition-all"
               href="#"
             >
               Calculate{" "}
-              <span className="material-symbols-outlined">arrow_forward</span>
-            </a>
+              {/* <span className="material-symbols-outlined">arrow_forward</span> */}
+            </p>
           </div>
         </div>
       </section>
@@ -345,9 +342,9 @@ export default function HomePage() {
                 Located in the heart of the business district. Open 24/7 for
                 express drop-offs and concierge pickup.
               </p>
-              <button className="w-full py-3 bg-[#002B5B] text-[#ffffff] rounded-lg font-bold text-sm hover:opacity-90 transition-opacity">
-                View Directions
-              </button>
+              <p className="w-full py-3 bg-[#002B5B] text-[#ffffff] rounded-lg font-bold text-sm hover:opacity-90 transition-opacity">
+                Directions
+              </p>
             </div>
           </div>
           <div>
@@ -412,7 +409,7 @@ export default function HomePage() {
             </div>
             <button className="mt-12 bg-transparent border-2 border-[#002B5B] text-[#002B5B] px-8 py-4 rounded-lg font-bold hover:bg-[#002B5B] hover:text-white transition-all flex items-center gap-3">
               Find Your Nearest Hub
-              <ArrowRight className="h-4 w-4" />
+              {/* <ArrowRight className="h-4 w-4" /> */}
             </button>
           </div>
         </div>

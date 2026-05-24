@@ -234,7 +234,7 @@ export default function CourierAssigned() {
             </div>
             {/* <!-- Action Buttons --> */}
             <div className="flex items-center justify-center gap-6 mt-12 w-full">
-              <button
+              {/* <button
                 onClick={handleLiveMap}
                 className="flex-1 max-w-[280px] h-14 kinetic-gradient text-white rounded-xl font-bold flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-[0.98] transition-all emerald-glow group"
               >
@@ -251,7 +251,7 @@ export default function CourierAssigned() {
                 >
                   arrow_forward
                 </span>
-              </button>
+              </button> */}
               <button
                 onClick={handleDashboard}
                 className="flex-1 max-w-[280px] h-14 border-2 border-[#001736]/20 text-[#001736] rounded-xl font-bold flex items-center justify-center gap-3 hover:bg-[#001736]/5 transition-all"

@@ -113,6 +113,18 @@ export default function ManageShipments() {
     }
   };
 
+  const etaText = (shipment) => {
+    if (shipment.status === "delivered") {
+      return "Completed";
+    }
+
+    if (shipment?.eta?.etaDays) {
+      return `${shipment.eta.etaDays.min}-${shipment.eta.etaDays.max} days`;
+    }
+
+    return shipment?.eta?.type === "predicted" ? "Predicting..." : "N/A";
+  };
+
   // active Service button
 
   const getServiceClass = (value) =>
@@ -351,17 +363,9 @@ export default function ManageShipments() {
                       <td className="p-5">{s.serviceLevel}</td>
 
                       <td className="p-5">
-                        {s.eta?.etaDays ? (
-                          <span className="font-semibold text-[#006d36]">
-                            {s.eta.etaDays} days
-                          </span>
-                        ) : (
-                          <span className="text-[#43474f] italic">
-                            {s.eta?.type === "predicted"
-                              ? "Predicting..."
-                              : "N/A"}
-                          </span>
-                        )}
+                        <span className="font-semibold text-[#006d36]">
+                          {etaText(s)}
+                        </span>
                       </td>
 
                       {/* actions */}

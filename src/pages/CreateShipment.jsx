@@ -46,9 +46,10 @@ export default function CreateShipment() {
     },
     onSuccess: (res) => {
       toast.success("Shipment created and simulation started!");
-      navigate("/admin/shipment-successful", {
-        state: { shipment: res.data.data },
-      });
+
+      const shipment = res.data.data;
+
+      navigate(`/admin/shipment-successful/${shipment._id}`);
     },
     onError: (error) => {
       const message =
@@ -539,9 +540,9 @@ export default function CreateShipment() {
                         bolt
                       </span>
                       <span className="font-bold text-[#191c1d]">Priority</span>
-                      <span className="text-[11px] text-[#717972] font-medium">
+                      {/* <span className="text-[11px] text-[#717972] font-medium">
                         1-2 Business Days
-                      </span>
+                      </span> */}
                     </label>
                     <label className="relative flex flex-col p-4 border border-[#c0c9c1] rounded-xl cursor-pointer hover:border-[#006d36]/40 transition-all">
                       <input
@@ -559,9 +560,9 @@ export default function CreateShipment() {
                         schedule
                       </span>
                       <span className="font-bold text-[#191c1d]">Standard</span>
-                      <span className="text-[11px] text-[#717972] font-medium">
+                      {/* <span className="text-[11px] text-[#717972] font-medium">
                         3-5 Business Days
-                      </span>
+                      </span> */}
                     </label>
                     <label className="relative flex flex-col p-4 border border-[#c0c9c1] rounded-xl cursor-pointer hover:border-[#006d36]/40 transition-all">
                       <input
@@ -581,9 +582,9 @@ export default function CreateShipment() {
                       <span className="font-bold text-[#191c1d]">
                         Flash_Priority
                       </span>
-                      <span className="text-[11px] text-[#717972] font-medium">
+                      {/* <span className="text-[11px] text-[#717972] font-medium">
                         6-8 Business Days
-                      </span>
+                      </span> */}
                     </label>
                     <label className="relative flex flex-col p-4 border border-[#c0c9c1] rounded-xl cursor-pointer hover:border-[#006d36]/40 transition-all">
                       <input
@@ -603,9 +604,9 @@ export default function CreateShipment() {
                       <span className="font-bold text-[#191c1d]">
                         First Class
                       </span>
-                      <span className="text-[11px] text-[#717972] font-medium">
+                      {/* <span className="text-[11px] text-[#717972] font-medium">
                         9-11 Business Days
-                      </span>
+                      </span> */}
                     </label>
                     <label className="relative flex flex-col p-4 border border-[#c0c9c1] rounded-xl cursor-pointer hover:border-[#006d36]/40 transition-all">
                       <input
@@ -623,9 +624,9 @@ export default function CreateShipment() {
                         savings
                       </span>
                       <span className="font-bold text-[#191c1d]">Economy</span>
-                      <span className="text-[11px] text-[#717972] font-medium">
+                      {/* <span className="text-[11px] text-[#717972] font-medium">
                         12-15 Business Days
-                      </span>
+                      </span> */}
                     </label>
                   </div>
                 </div>

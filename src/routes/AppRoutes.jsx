@@ -57,9 +57,10 @@ const AdminCourierProfile = lazy(
   () => import("../components/AdminCourierProfile.jsx"),
 );
 const LiveChat = lazy(() => import("../components/LiveChat.jsx"));
+const PaymentSecurity = lazy(() => import("../components/PaymentSecurity.jsx"));
 
 /* =========================
-   🔐 Auth / Standalone
+    Auth / Standalone
 ========================= */
 const ResetPassword = lazy(() => import("../pages/Auth/ResetPassword.jsx"));
 const SignIn = lazy(() => import("../pages/Auth/SignIn.jsx"));
@@ -100,14 +101,11 @@ export default function AppRoutes() {
             { path: "tracking", element: <Tracking /> },
             { path: "about-us", element: <AboutUs /> },
             { path: "contact-us", element: <ContactUs /> },
+            { path: "payment-security", element: <PaymentSecurity /> },
           ],
         },
       ],
     },
-
-    // =============================
-    // 🔐 AUTH ROUTES
-    // =============================
 
     // =============================
     // 🔐 AUTH ROUTES
@@ -144,7 +142,7 @@ export default function AppRoutes() {
             { path: "create-shipment", element: <CreateShipment /> },
             { path: "edit-shipment/:id", element: <EditShipment /> },
             {
-              path: "shipment-successful",
+              path: "shipment-successful/:id",
               element: <ShipmentCreatedSuccessfully />,
             },
             { path: "Update-Status-Success", element: <UpdateStatusSuccess /> },
