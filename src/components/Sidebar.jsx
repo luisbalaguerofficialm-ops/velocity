@@ -114,7 +114,7 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
                 Logistics Control
               </p>
             </div>
-            <p className="text-xs text-slate-400 mb-2">OVERVIEW</p>
+            <p className="text-xs text-slate-400 mb-3">OVERVIEW</p>
             <NavButton to="/admin/dashboard" icon={LayoutGrid}>
               Dashboard
             </NavButton>
