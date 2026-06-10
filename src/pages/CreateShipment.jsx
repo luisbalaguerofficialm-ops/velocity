@@ -182,6 +182,7 @@ export default function CreateShipment() {
                     <span className="text-sm font-bold">Inter-city</span>
                   </div>
                 </label>
+                
                 <label className="relative">
                   <input
                     className="peer sr-only"

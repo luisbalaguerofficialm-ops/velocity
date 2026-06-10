@@ -66,6 +66,7 @@ export default function AdminProfile() {
                 className="hidden"
                 onChange={handleFileChange}
                 accept="image/*"
+                placeholder="image"
                 className="absolute inset-0 cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity"
               />
               <button

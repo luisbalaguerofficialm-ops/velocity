@@ -86,6 +86,16 @@ export default function AllShipmentFeed() {
     navigate("/admin/create-shipment");
   };
 
+  const etaText = (shipment) => {
+    if (shipment.status === "delivered") {
+      return "Delivered";
+    }
+
+    if (shipment?.eta?.etaDays) {
+      return `${shipment.eta.etaDays.min}-${shipment.eta.etaDays.max} days`;
+    }
+  };
+
   return (
     <div className="bg-[#e2fffe] text-[#002020]">
       <main className="p-8 min-h-[calc(100vh-64px)]">
@@ -316,11 +326,7 @@ export default function AllShipmentFeed() {
                         </span>
                       </td>
 
-                      <td className="p-4">
-                        {shipment.eta?.etaDays
-                          ? `${shipment.eta.etaDays} days`
-                          : "N/A"}
-                      </td>
+                      <td className="p-4">{etaText(shipment)}</td>
 
                       <td className="p-4 flex gap-2">
                         <button
