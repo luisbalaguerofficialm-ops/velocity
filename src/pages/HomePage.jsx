@@ -1,14 +1,25 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight, ArrowRight, Play, X } from "lucide-react";
 import { Link, useNavigate } from "react-router";
 import { useMutation } from "@tanstack/react-query";
 import axiosClient from "../utils/axiosClient";
 import { toast } from "sonner";
 
+// import image2 from "../assets/logaa.jpg";
+// import image3 from "../assets/logger2.jpg";
+import image4 from "../assets/wwww.jpg";
+import image5 from "../assets/looo.jpg";
+import card from "../assets/cad.jpg";
+import image1 from "../assets/ccc.jpg";
+import image6 from "../assets/ssssww.jpg";
+
 export default function HomePage() {
   const navigate = useNavigate();
   const [trackingId, setTrackingId] = useState("");
   const [isVideoOpen, setIsVideoOpen] = useState(false);
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  const images = [image1, image4, image5, image6];
 
   const { mutate, isPending } = useMutation({
     mutationFn: async (trackingId) => {
@@ -36,24 +47,31 @@ export default function HomePage() {
 
     mutate(trackingId);
   };
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % images.length);
+    }, 9000);
+
+    return () => clearInterval(interval); // Cleanup on unmount
+  }, [images.length]);
   return (
     <div className="pt-20">
       {/* <!-- Hero Section --> */}
-      <section className="relative bg-[#001b3d] min-h-217.5 flex items-center overflow-hidden hero-clip">
-        <div className="absolute inset-0 opacity-40">
+      <section className="relative min-h-217.5 flex items-center overflow-hidden">
+        <div className="absolute inset-0">
           <img
             className="w-full h-full object-cover"
-            data-alt="Modern logistics warehouse with blue lighting and motion blur"
-            src="https://lh3.googleusercontent.com/aida-public/AB6AXuDidrV8qxeFIM4vfDv-4ioOwko0GUMJWCsJ9EFdqsY75znKI9ilXf5XqMptX7PSydCp-6XifTOMmkWfCPiW7DLZDG-uMmx9Ng04lBqNady9TG22wA3Q9gIDbaWztGV0_kNzzhg256DPUk5KL6qB5Hf8recG8EgBmEAGY1py-w-pVdiM41YZAXEO5Z2678I6ydJ1bT3xGkF1YrdNXhOExN9D17FaXSqLk26jZPtSaFMiKaEqEPo8_n5TrfmOQPZIsevBFm-IA0fdhDw9"
+            src={images[currentIndex]}
           />
         </div>
-        <div className="absolute inset-0 kinetic-gradient opacity-60"></div>
+
         <div className="relative z-10 max-w-360 mx-auto px-8 w-full">
           <div className="max-w-3xl">
             <h1 className="font-headline text-7xl font-extrabold text-white leading-tight tracking-tight mb-8">
               Precision in <span className="text-[#63fca7]">Motion</span>
             </h1>
-            <p className="text-[#7594ca] text-xl font-body mb-12 max-w-xl">
+            <p className="text-white text-xl font-body mb-12 max-w-xl">
               Experience the next generation of global logistics. Real-time
               tracking, seamless integration, and unparalleled reliability for
               your most critical shipments.
@@ -174,62 +192,158 @@ export default function HomePage() {
             </h2>
           </div>
         </div>
-        <div className="flex gap-8 px-8 max-w-[1440px] mx-auto overflow-x-auto pb-4">
-          {/* <!-- Service Card 1 --> */}
-          <div className="min-w-[400px] h-[500px] rounded-2xl relative overflow-hidden group">
-            <img
-              className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-              data-alt="Heavy cargo delivery truck on a coastal highway"
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuCj8SO2ziVRLG7YyuQsPDrpJVPi-ZccTVaJtwkr5pvlyrqPxyXVdB797neI9pKObpYlzBP8tOgjfIUIeVkNR7OaPX3mDGqESe3RyAVsMREnkDxvTCD3MVn7UHFsEkChY6SWZQn-i7zVScdxg3-wkQqb3c9Bfp7BaLVVxoSQYeuvykIPSokiIdX5kMbVxg68L4lVBOAPctMactId-FyYPvy8SaJO7aS6LFAFvQ3gFyyJdAm-nyFAXZaLYc6dvkoehvu91wKK1jP2vNFJ"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#001736]/90 via-[#001736]/20 to-transparent"></div>
-            <div className="absolute bottom-0 left-0 p-8">
-              <div className="bg-[#006d3e] text-[#002111] px-3 py-1 rounded-full text-xs font-bold mb-4 inline-block">
-                MOST POPULAR
+        <div className="overflow-hidden">
+          <div className="flex gap-8 animate-marquee w-max">
+            {/* <!-- Service Card 1 --> */}
+            <div className="min-w-[400px] h-[500px] rounded-2xl relative overflow-hidden group">
+              <img
+                className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                data-alt="Heavy cargo delivery truck on a coastal highway"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuCj8SO2ziVRLG7YyuQsPDrpJVPi-ZccTVaJtwkr5pvlyrqPxyXVdB797neI9pKObpYlzBP8tOgjfIUIeVkNR7OaPX3mDGqESe3RyAVsMREnkDxvTCD3MVn7UHFsEkChY6SWZQn-i7zVScdxg3-wkQqb3c9Bfp7BaLVVxoSQYeuvykIPSokiIdX5kMbVxg68L4lVBOAPctMactId-FyYPvy8SaJO7aS6LFAFvQ3gFyyJdAm-nyFAXZaLYc6dvkoehvu91wKK1jP2vNFJ"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#001736]/90 via-[#001736]/20 to-transparent"></div>
+              <div className="absolute bottom-0 left-0 p-8">
+                <div className="bg-[#006d3e] text-[#002111] px-3 py-1 rounded-full text-xs font-bold mb-4 inline-block">
+                  MOST POPULAR
+                </div>
+                <h4 className="font-headline text-2xl font-bold text-white mb-2">
+                  Priority Velocity
+                </h4>
+                <p className="text-slate-300 font-body text-sm">
+                  Guaranteed next-day delivery across 45 countries with
+                  dedicated courier handling.
+                </p>
               </div>
-              <h4 className="font-headline text-2xl font-bold text-white mb-2">
-                Priority Velocity
-              </h4>
-              <p className="text-slate-300 font-body text-sm">
-                Guaranteed next-day delivery across 45 countries with dedicated
-                courier handling.
-              </p>
             </div>
-          </div>
-          {/* <!-- Service Card 2 --> */}
-          <div className="min-w-[400px] h-[500px] rounded-2xl relative overflow-hidden group">
-            <img
-              className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-              data-alt="Cargo plane loading containers at night"
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuBVDtidL8OtCW9VVK7DYCFPmWRP1W0PKJFhUmlkwxemDHI9KzsaYnxY8uUGUBmVh8oKtCqiNQyK86rd9aIU-RGxU_LRz69dTPXeHRNn83qqmywYeo2fMydJBWdmfqEKfWo6UWgVtg0ImwsE1oNMLD8zRhz0-Y5eDNe_l3lfDQS6A5DzxW406oFMusG7_UW10NeosWTuzvtMhCRPv7UMQELPtE9hE6loYUNHmi3RJ67OdXtE9-PWjqBrDsUqYP1G_18hHG6D5VBmX5EB"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#001736]/90 via-[#001736]/20 to-transparent"></div>
-            <div className="absolute bottom-0 left-0 p-8">
-              <h4 className="font-headline text-2xl font-bold text-white mb-2">
-                Intercontinental Air
-              </h4>
-              <p className="text-slate-300 font-body text-sm">
-                Swift air-freight solutions for oversized shipments with global
-                customs clearance.
-              </p>
+            {/* <!-- Service Card 2 --> */}
+            <div className="min-w-[400px] h-[500px] rounded-2xl relative overflow-hidden group">
+              <img
+                className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                data-alt="Cargo plane loading containers at night"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBVDtidL8OtCW9VVK7DYCFPmWRP1W0PKJFhUmlkwxemDHI9KzsaYnxY8uUGUBmVh8oKtCqiNQyK86rd9aIU-RGxU_LRz69dTPXeHRNn83qqmywYeo2fMydJBWdmfqEKfWo6UWgVtg0ImwsE1oNMLD8zRhz0-Y5eDNe_l3lfDQS6A5DzxW406oFMusG7_UW10NeosWTuzvtMhCRPv7UMQELPtE9hE6loYUNHmi3RJ67OdXtE9-PWjqBrDsUqYP1G_18hHG6D5VBmX5EB"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#001736]/90 via-[#001736]/20 to-transparent"></div>
+              <div className="absolute bottom-0 left-0 p-8">
+                <h4 className="font-headline text-2xl font-bold text-white mb-2">
+                  Intercontinental Air
+                </h4>
+                <p className="text-slate-300 font-body text-sm">
+                  Swift air-freight solutions for oversized shipments with
+                  global customs clearance.
+                </p>
+              </div>
             </div>
-          </div>
-          {/* <!-- Service Card 3 --> */}
-          <div className="min-w-[400px] h-[500px] rounded-2xl relative overflow-hidden group">
-            <img
-              className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-              data-alt="Logistics drone flying over a modern city"
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuDN1XDIWSAVwpQaHTXM_txgknf6pzpAlBgeoTNZtXkBTHIGcc_3bWOTl5uEO7iCUH-O1J59DB4GcLQvgti1gHnvAjKwExXbti_hwg0-9tbkmayuJ-89fRSJbQX6LwgrKzU9OraVNJN59C6cB3ZIeRLVwr0LrAXVHuu8mj1dpNXQt5_lfJNeffOaIYV1k5k5vJCwo2Ul-uaiR1RSM5hWLPQanU8Y9f_89n4Tivv_-770-J89bz2yX6WLyJihHyt5l-9ouhDrBm3NByuW"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#001736]/90 via-[#001736]/20 to-transparent"></div>
-            <div className="absolute bottom-0 left-0 p-8">
-              <h4 className="font-headline text-2xl font-bold text-white mb-2">
-                Last Mile Drone
-              </h4>
-              <p className="text-slate-300 font-body text-sm">
-                Cutting-edge autonomous delivery for urban environments and
-                remote areas.
-              </p>
+            {/* <!-- Service Card 3 --> */}
+            <div className="min-w-[400px] h-[500px] rounded-2xl relative overflow-hidden group">
+              <img
+                className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                data-alt="Logistics drone flying over a modern city"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuDN1XDIWSAVwpQaHTXM_txgknf6pzpAlBgeoTNZtXkBTHIGcc_3bWOTl5uEO7iCUH-O1J59DB4GcLQvgti1gHnvAjKwExXbti_hwg0-9tbkmayuJ-89fRSJbQX6LwgrKzU9OraVNJN59C6cB3ZIeRLVwr0LrAXVHuu8mj1dpNXQt5_lfJNeffOaIYV1k5k5vJCwo2Ul-uaiR1RSM5hWLPQanU8Y9f_89n4Tivv_-770-J89bz2yX6WLyJihHyt5l-9ouhDrBm3NByuW"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#001736]/90 via-[#001736]/20 to-transparent"></div>
+              <div className="absolute bottom-0 left-0 p-8">
+                <h4 className="font-headline text-2xl font-bold text-white mb-2">
+                  Last Mile Drone
+                </h4>
+                <p className="text-slate-300 font-body text-sm">
+                  Cutting-edge autonomous delivery for urban environments and
+                  remote areas.
+                </p>
+              </div>
+            </div>
+            {/* ================== */}
+            <div className="min-w-[400px] h-[500px] rounded-2xl relative overflow-hidden group">
+              <img
+                className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                data-alt="Cargo plane loading containers at night"
+                src={card}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#001736]/90 via-[#001736]/20 to-transparent"></div>
+              <div className="absolute bottom-0 left-0 p-8">
+                <h4 className="font-headline text-2xl font-bold text-white mb-2">
+                  LOADING
+                </h4>
+                <p className="text-slate-300 font-body text-sm">
+                  Swift air-freight solutions for oversized shipments with
+                  global customs clearance.
+                </p>
+              </div>
+            </div>
+            {/* =========================deplecate */}
+
+            <div className="min-w-[400px] h-[500px] rounded-2xl relative overflow-hidden group">
+              <img
+                className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                data-alt="Heavy cargo delivery truck on a coastal highway"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuCj8SO2ziVRLG7YyuQsPDrpJVPi-ZccTVaJtwkr5pvlyrqPxyXVdB797neI9pKObpYlzBP8tOgjfIUIeVkNR7OaPX3mDGqESe3RyAVsMREnkDxvTCD3MVn7UHFsEkChY6SWZQn-i7zVScdxg3-wkQqb3c9Bfp7BaLVVxoSQYeuvykIPSokiIdX5kMbVxg68L4lVBOAPctMactId-FyYPvy8SaJO7aS6LFAFvQ3gFyyJdAm-nyFAXZaLYc6dvkoehvu91wKK1jP2vNFJ"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#001736]/90 via-[#001736]/20 to-transparent"></div>
+              <div className="absolute bottom-0 left-0 p-8">
+                <div className="bg-[#006d3e] text-[#002111] px-3 py-1 rounded-full text-xs font-bold mb-4 inline-block">
+                  MOST POPULAR
+                </div>
+                <h4 className="font-headline text-2xl font-bold text-white mb-2">
+                  Priority Velocity
+                </h4>
+                <p className="text-slate-300 font-body text-sm">
+                  Guaranteed next-day delivery across 45 countries with
+                  dedicated courier handling.
+                </p>
+              </div>
+            </div>
+            {/* <!-- Service Card 2 --> */}
+            <div className="min-w-[400px] h-[500px] rounded-2xl relative overflow-hidden group">
+              <img
+                className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                data-alt="Cargo plane loading containers at night"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBVDtidL8OtCW9VVK7DYCFPmWRP1W0PKJFhUmlkwxemDHI9KzsaYnxY8uUGUBmVh8oKtCqiNQyK86rd9aIU-RGxU_LRz69dTPXeHRNn83qqmywYeo2fMydJBWdmfqEKfWo6UWgVtg0ImwsE1oNMLD8zRhz0-Y5eDNe_l3lfDQS6A5DzxW406oFMusG7_UW10NeosWTuzvtMhCRPv7UMQELPtE9hE6loYUNHmi3RJ67OdXtE9-PWjqBrDsUqYP1G_18hHG6D5VBmX5EB"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#001736]/90 via-[#001736]/20 to-transparent"></div>
+              <div className="absolute bottom-0 left-0 p-8">
+                <h4 className="font-headline text-2xl font-bold text-white mb-2">
+                  Intercontinental Air
+                </h4>
+                <p className="text-slate-300 font-body text-sm">
+                  Swift air-freight solutions for oversized shipments with
+                  global customs clearance.
+                </p>
+              </div>
+            </div>
+            {/* <!-- Service Card 3 --> */}
+            <div className="min-w-[400px] h-[500px] rounded-2xl relative overflow-hidden group">
+              <img
+                className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                data-alt="Logistics drone flying over a modern city"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuDN1XDIWSAVwpQaHTXM_txgknf6pzpAlBgeoTNZtXkBTHIGcc_3bWOTl5uEO7iCUH-O1J59DB4GcLQvgti1gHnvAjKwExXbti_hwg0-9tbkmayuJ-89fRSJbQX6LwgrKzU9OraVNJN59C6cB3ZIeRLVwr0LrAXVHuu8mj1dpNXQt5_lfJNeffOaIYV1k5k5vJCwo2Ul-uaiR1RSM5hWLPQanU8Y9f_89n4Tivv_-770-J89bz2yX6WLyJihHyt5l-9ouhDrBm3NByuW"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#001736]/90 via-[#001736]/20 to-transparent"></div>
+              <div className="absolute bottom-0 left-0 p-8">
+                <h4 className="font-headline text-2xl font-bold text-white mb-2">
+                  Last Mile Drone
+                </h4>
+                <p className="text-slate-300 font-body text-sm">
+                  Cutting-edge autonomous delivery for urban environments and
+                  remote areas.
+                </p>
+              </div>
+            </div>
+            {/* ================== */}
+            <div className="min-w-[400px] h-[500px] rounded-2xl relative overflow-hidden group">
+              <img
+                className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                data-alt="Cargo plane loading containers at night"
+                src={card}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#001736]/90 via-[#001736]/20 to-transparent"></div>
+              <div className="absolute bottom-0 left-0 p-8">
+                <h4 className="font-headline text-2xl font-bold text-white mb-2">
+                  LOADING
+                </h4>
+                <p className="text-slate-300 font-body text-sm">
+                  Swift air-freight solutions for oversized shipments with
+                  global customs clearance.
+                </p>
+              </div>
             </div>
           </div>
         </div>

@@ -89,3 +89,17 @@ body {
 .animate-active-shake {
   animation: shake 0.5s infinite;
 }
+/* ================================= */
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  animation: marquee 35s linear infinite;
+}

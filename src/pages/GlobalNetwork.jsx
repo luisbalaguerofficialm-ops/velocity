@@ -1,8 +1,9 @@
 import React from "react";
+import lodd from "../assets/loaded.jpg";
 
 export default function GlobalNetwork() {
   return (
-    <div className="bg-[#e2fffe] text-[#002020] font-body selection:bg-[#83fba5] selection:text-[#00743a]">
+    <div className="bg-[#e2fffe] text-left text-[#002020] font-body selection:bg-[#83fba5] selection:text-[#00743a]">
       <main className="pt-20">
         {/* <!-- Hero Section: Kinetic Map Overlay --> */}
         <section className="relative h-[819px] w-full overflow-hidden">
@@ -11,7 +12,7 @@ export default function GlobalNetwork() {
               className="w-full h-full object-cover opacity-60 mix-blend-screen"
               data-alt="Abstract 3D topographic map with glowing emerald energy lines connecting major global cities on a dark midnight navy blue background"
               data-location="Global"
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuAF9Ss4wHsKQdj1Q5zd-_UyP5OdjNBJiBVD3etH4xKPOkkTw_gFR36FFDR3XSOQSBIEeTDQuE251QyLXYmu8POjuhhfq8dwr3CeGXY7Kr9Mq5h_lmw5YKkS_UvEDs3P3HgZ2f1FYiOI9Sn9RNpYMm3cgL9rJXFwF8EzXGKXmnZHmB1oEJBko81UXIb-XSiam_gYoRGu8-q8Uzpq89sP3rFIfWWlIDkJSi8e6AfbL6LTqpiheZ9u0oNK-XzgDvLjje7pXINhCeZQ1cZZ"
+              src={lodd}
             />
           </div>
           <div className="relative z-10 h-full flex flex-col justify-center px-8 md:px-20 pointer-events-none">
@@ -19,9 +20,9 @@ export default function GlobalNetwork() {
               <span className="inline-block px-3 py-1 bg-[#83fba5] text-[#00743a] rounded-full text-xs font-bold tracking-widest uppercase mb-4">
                 Aerodynamic Archive
               </span>
-              <h1 className="text-5xl md:text-7xl font-extrabold text-[#83fba5] tracking-tighter leading-[0.9] mb-6">
+              <h1 className="text-5xl md:text-7xl font-extrabold text-white tracking-tighter leading-[0.9] mb-6">
                 Velocity <br />
-                <span className="text-[#006d36] italic">Transit</span> Network
+                <span className="text-white italic">Transit</span> Network
               </h1>
               <p className="text-[#ffffff] text-lg md:text-xl font-light max-w-xl leading-relaxed">
                 A precision-engineered infrastructure spanning the globe,
