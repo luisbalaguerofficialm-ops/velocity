@@ -5,8 +5,8 @@ import { useMutation } from "@tanstack/react-query";
 import axiosClient from "../utils/axiosClient";
 import { toast } from "sonner";
 
-// import image2 from "../assets/logaa.jpg";
-// import image3 from "../assets/logger2.jpg";
+
+import image3 from "../assets/tttttt.jpg";
 import image4 from "../assets/wwww.jpg";
 import image5 from "../assets/looo.jpg";
 import card from "../assets/cad.jpg";
@@ -19,7 +19,7 @@ export default function HomePage() {
   const [isVideoOpen, setIsVideoOpen] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  const images = [image1, image4, image5, image6];
+  const images = [image1, image3, image4, image5, image6];
 
   const { mutate, isPending } = useMutation({
     mutationFn: async (trackingId) => {
